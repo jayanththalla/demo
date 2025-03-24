@@ -10,6 +10,11 @@ export default defineConfig({
     'process.env': process.env
   },
   server: {
+    host: true,
+    strictPort: true,
+    allowedHosts: [
+      "bingehall.onrender.com"
+    ],
     port: process.env.PORT // change here
   }
 })
