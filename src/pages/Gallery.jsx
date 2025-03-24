@@ -8,20 +8,20 @@ const Gallery = () => {
     // Gallery images - replace with your actual image paths
     const galleryImages = [
         // Row 1 - Cake images
-        { id: 1, src: '/assets/gallery/1.png', alt: 'Celebration cake', category: 'events' },
-        { id: 2, src: '/assets/gallery/2.png', alt: 'Celebration cake closeup', category: 'events' },
+        { id: 1, src: '/assets/gallery/1.jpg', alt: 'Celebration cake', category: 'events' },
+        { id: 2, src: '/assets/gallery/2.jpg', alt: 'Celebration cake closeup', category: 'events' },
 
         // Row 2 - Concert/light images
-        { id: 3, src: '/assets/gallery/3.png', alt: 'Concert lighting effects', category: 'ambiance' },
-        { id: 4, src: '/assets/gallery/4.png', alt: 'Audience at concert', category: 'ambiance' },
+        { id: 3, src: '/assets/gallery/3.jpg', alt: 'Concert lighting effects', category: 'ambiance' },
+        { id: 4, src: '/assets/gallery/4.jpg', alt: 'Audience at concert', category: 'ambiance' },
 
         // Row 3 - Crowd images
-        { id: 5, src: '/assets/gallery/5.png', alt: 'Event crowd with lights', category: 'audience' },
-        { id: 6, src: '/assets/gallery/6.png', alt: 'Event crowd celebration', category: 'audience' },
+        { id: 5, src: '/assets/gallery/5.jpg', alt: 'Event crowd with lights', category: 'audience' },
+        { id: 6, src: '/assets/gallery/6.jpg', alt: 'Event crowd celebration', category: 'audience' },
 
         // Row 4 - Confetti images
-        { id: 7, src: '/assets/gallery/7.png', alt: 'Confetti celebration', category: 'effects' },
-        { id: 8, src: '/assets/gallery/7.png', alt: 'Confetti celebration closeup', category: 'effects' },
+        { id: 7, src: '/assets/gallery/7.jpg', alt: 'Confetti celebration', category: 'effects' },
+        { id: 8, src: '/assets/gallery/8.jpg', alt: 'Confetti celebration closeup', category: 'effects' },
     ];
 
     // Function to open the image modal
@@ -46,16 +46,18 @@ const Gallery = () => {
     };
 
     return (
-        <div className="bg-black text-white pb-12">
+        <div className="bg-white text-black pb-12">
             <div className="relative">
                 <h2 className="text-center text-3xl font-bold py-4">Gallery</h2>
 
                 {/* Gallery intro with film strip background */}
-                <div className="relative bg-black text-white py-12 md:py-16" style={{ backgroundImage: 'url(/assets/gallery/reel.png)', backgroundSize: 'cover', backgroundPosition: 'center' }}>
+                <div className="relative text-black py-12 md:py-16" style={{ backgroundImage: 'url(/assets/reel.png)', backgroundSize: 'cover', backgroundPosition: 'center' }}>
+                    {/* Overlay to ensure text readability */}
+
                     {/* Content */}
                     <div className="relative z-10 max-w-3xl mx-auto text-center px-4 md:px-6">
-                        <h3 className="text-xl md:text-2xl font-bold mb-3">Explore the Cinematic Marvels of BingeHall!</h3>
-                        <p className="text-sm md:text-base text-gray-300">
+                        <h3 className="text-xl md:text-2xl font-bold mb-3" style={{ color: 'yellow-400' }}>Explore the Cinematic Marvels of BingeHall!</h3>
+                        <p className="text-sm md:text-base text-white">
                             From intimate celebrations to blockbuster events, witness the magic unfold in
                             our gallery. Discover the joy-filled moments, the awe-inspiring celebrations,
                             and the unforgettable memories that make BingeHall the ultimate destination for cinematic festivities.
@@ -83,7 +85,8 @@ const Gallery = () => {
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ delay: index * 0.1, duration: 0.5 }}
                             whileHover={{ scale: 1.03 }}
-                            className="relative rounded-lg overflow-hidden cursor-pointer"
+                            className="relative rounded-lg overflow-hidden cursor-pointer border-2"
+                            style={{ borderColor: 'yellow' }}
                             onClick={() => openModal(image)}
                         >
                             <img
@@ -116,7 +119,8 @@ const Gallery = () => {
                         onClick={e => e.stopPropagation()}
                     >
                         <button
-                            className="absolute top-2 right-2 z-10 bg-red-600 rounded-full p-1 text-white"
+                            className="absolute top-2 right-2 z-10 rounded-full p-1 text-white"
+                            style={{ backgroundColor: '#9f1d21' }}
                             onClick={closeModal}
                         >
                             <X className="w-5 h-5 md:w-6 md:h-6" />
@@ -151,7 +155,7 @@ const Gallery = () => {
                             </button>
                         </div>
 
-                        <div className="text-white p-2 md:p-4 text-center">
+                        <div className="bg-white text-black p-2 md:p-4 text-center rounded-b-lg">
                             <p className="text-base md:text-lg font-semibold">{selectedImage.alt}</p>
                         </div>
                     </motion.div>
@@ -161,7 +165,8 @@ const Gallery = () => {
             {/* View More Button */}
             <div className="text-center mt-8">
                 <motion.button
-                    className="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 md:px-6 rounded-full"
+                    style={{ backgroundColor: '#9f1d21' }}
+                    className="hover:bg-red-700 text-white font-bold py-2 px-4 md:px-6 rounded-full"
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                 >

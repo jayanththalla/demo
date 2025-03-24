@@ -6,7 +6,7 @@ import About from '../pages/About';
 import Gallery from '../pages/Gallery';
 import Contact from '../pages/Contact';
 import Book from '../pages/Book';
-import BookingModal from '../pages/Booking';
+import AdminDashboard from '../pages/admin/admin';
 export const router = createBrowserRouter([
     {
         path: '/',
@@ -33,8 +33,8 @@ export const router = createBrowserRouter([
                 element: <Book />,
             },
             {
-                path: 'booking',
-                element: <BookingModal />,
+                path: 'admin',
+                element: <AdminDashboard />,
             }
         ],
     },

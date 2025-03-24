@@ -37,7 +37,7 @@ const Contact = () => {
     ];
 
     return (
-        <div className="bg-black text-white min-h-screen">
+        <div className="bg-white text-black min-h-screen">
 
             <div className="container mx-auto px-4 py-8">
                 <motion.h1
@@ -49,27 +49,26 @@ const Contact = () => {
                     Contact us
                 </motion.h1>
 
-                {/* Timings Section */}
+
                 <motion.div
-                    className="relative max-w-3xl mx-auto mb-12 text-center bg-opacity-50 p-4 md:p-6 rounded-lg"
+                    className="relative max-w-3xl mx-auto mb-12 text-center bg-opacity-50 p-4 md:p-6 rounded-lg bg-gray-100"
                     style={{
                         backgroundImage: 'url(/assets/curtain.png)',
                         backgroundSize: 'cover',
-                        // filter: 'sepia(100%) hue-rotate(10deg) saturate(400%)' // Yellow tint
                     }}
                     initial={{ scale: 0.9, opacity: 0 }}
                     animate={{ scale: 1, opacity: 1 }}
                     transition={{ duration: 0.5 }}
                 >
-                    <h2 className="text-2xl md:text-3xl font-bold mb-4 text-[#FDDD3F]">Timings</h2>
+                    <h2 className="text-2xl md:text-3xl font-bold mb-4 text-white">Timings</h2>
                     <div className="mb-3">
-                        <p className="text-lg md:text-xl">Monday to Friday: 10 AM - 10 PM</p>
-                        <p className="text-lg md:text-xl">Weekends: 9 AM - 11 PM</p>
+                        <p className="text-lg md:text-xl text-yellow-400">Monday to Friday: 10 AM - 10 PM</p>
+                        <p className="text-lg md:text-xl text-yellow-400">Weekends: 9 AM - 11 PM</p>
                     </div>
-                    <p className="text-sm md:text-base text-gray-300">
+                    <p className="text-sm md:text-base text-white">
                         For reservations and special events, please call during business hours or fill out the contact form below.
                     </p>
-                    <p className="text-base md:text-lg font-bold mt-2">Contact: +1 555-123-4567</p>
+                    <p className="text-base md:text-lg font-bold mt-2 text-yellow-400">Contact: +91  9100111402</p>
 
                     {/* Popcorn Animation */}
                     <motion.div
@@ -95,21 +94,21 @@ const Contact = () => {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.7, delay: 0.2 }}
                 >
-                    <h2 className="text-2xl md:text-3xl font-bold text-center mb-6 text-[#FDDD3F]">Frequently Asked Questions</h2>
-                    <div className="bg-gray-900 rounded-lg overflow-hidden shadow-lg border border-[#FDDD3F]">
+                    <h2 className="text-2xl md:text-3xl font-bold text-center mb-6 text-[#9f1d21]">Frequently Asked Questions</h2>
+                    <div className="bg-gray-100 rounded-lg overflow-hidden shadow-lg border border-yellow-400">
                         {faqs.map((faq, index) => (
                             <motion.div
                                 key={index}
-                                className="border-b border-[#FDDD3F] last:border-b-0"
+                                className="border-b border-yellow-300 last:border-b-0"
                                 initial={{ opacity: 0, x: -20 }}
                                 animate={{ opacity: 1, x: 0 }}
                                 transition={{ duration: 0.3, delay: 0.1 * index }}
                             >
                                 <details className="group p-4">
-                                    <summary className="flex justify-between items-center cursor-pointer list-none text-white">
+                                    <summary className="flex justify-between items-center cursor-pointer list-none text-black">
                                         <span className="font-medium">{faq.question}</span>
                                         <motion.span
-                                            className="transition text-[#FDDD3F]"
+                                            className="transition text-[#9f1d21]"
                                             whileHover={{ scale: 1.2 }}
                                         >
                                             <svg fill="none" height="24" shapeRendering="geometricPrecision" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" viewBox="0 0 24 24" width="24">
@@ -117,7 +116,7 @@ const Contact = () => {
                                             </svg>
                                         </motion.span>
                                     </summary>
-                                    <p className="mt-3 text-gray-200 group-open:animate-fadeIn pl-2 border-l-2 border-[#FDDD3F]">
+                                    <p className="mt-3 text-gray-700 group-open:animate-fadeIn pl-2 border-l-2 border-yellow-400">
                                         {faq.answer}
                                     </p>
                                 </details>
@@ -128,7 +127,7 @@ const Contact = () => {
 
                 {/* Slogan Banner on Film Reel */}
                 <motion.div
-                    className="max-w-4xl mx-auto p-4 md:p-8 mb-12 bg-gray-900 rounded-lg text-center relative overflow-hidden"
+                    className="max-w-4xl mx-auto p-4 md:p-8 mb-12 bg-gray-100 rounded-lg text-center relative overflow-hidden"
                     style={{
                         backgroundImage: 'url(/assets/reel.png)',
                         backgroundSize: 'cover',
@@ -140,13 +139,13 @@ const Contact = () => {
                     whileHover={{ scale: 1.02 }}
                 >
                     <motion.div
-                        className="relative z-10 p-4 md:p-6 bg-black bg-opacity-70 rounded-lg"
+                        className="relative z-10 p-4 md:p-6 bg-white bg-opacity-90 rounded-lg"
                         animate={{
-                            boxShadow: ['0 0 0px #FDDD3F', '0 0 20px #FDDD3F', '0 0 0px #FDDD3F']
+                            boxShadow: ['0 0 0px #9f1d21', '0 0 20px #FDDD3F', '0 0 0px #FDDD3F']
                         }}
                         transition={{ duration: 2, repeat: Infinity }}
                     >
-                        <h3 className="text-xl md:text-3xl font-bold text-[#FDDD3F]">BingeHall: Where Every Frame is a Celebration, Every Moment a Blockbuster!</h3>
+                        <h3 className="text-xl md:text-3xl font-bold text-[#9f1d21]">BingeHall: Where Every Frame is a Celebration, Every Moment a Blockbuster!</h3>
                     </motion.div>
 
                     {/* Star decoration */}
@@ -165,40 +164,40 @@ const Contact = () => {
                 <div className="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
                     {/* Contact Information */}
                     <motion.div
-                        className="bg-gray-900 p-6 rounded-lg shadow-lg border-2 border-[#FDDD3F]"
+                        className="bg-gray-100 p-6 rounded-lg shadow-lg border-2 border-yellow-400"
                         initial={{ x: -50, opacity: 0 }}
                         animate={{ x: 0, opacity: 1 }}
                         transition={{ duration: 0.5 }}
-                        whileHover={{ boxShadow: '0 0 15px #FDDD3F' }}
+                        whileHover={{ boxShadow: '0 0 15px rgba(234, 179, 8, 0.5)' }}
                     >
-                        <h3 className="text-xl md:text-2xl font-bold mb-4 text-[#FDDD3F]">Contact Information</h3>
+                        <h3 className="text-xl md:text-2xl font-bold mb-4 text-[#9f1d21]">Contact Information</h3>
                         <ul className="space-y-4">
                             <motion.li
                                 className="flex items-center"
                                 whileHover={{ x: 5 }}
                             >
-                                <Phone className="mr-3 text-[#FDDD3F]" size={20} />
-                                <span>+1 520-433-4484</span>
+                                <Phone className="mr-3 text-[#9f1d21]" size={20} />
+                                <span>+91  9100111402</span>
                             </motion.li>
                             <motion.li
                                 className="flex items-center"
                                 whileHover={{ x: 5 }}
                             >
-                                <Mail className="mr-3 text-[#FDDD3F]" size={20} />
+                                <Mail className="mr-3 text-[#9f1d21]" size={20} />
                                 <span>info@bingehall.com</span>
                             </motion.li>
                             <motion.li
                                 className="flex items-center"
                                 whileHover={{ x: 5 }}
                             >
-                                <MapPin className="mr-3 text-[#FDDD3F]" size={20} />
-                                <span>123 Cinema Street, Movie City, MC 12345</span>
+                                <MapPin className="mr-3 text-[#9f1d21]" size={50} />
+                                <span>Binge Hall, Laxmi Heights, Vasavi Colony, Nagole Road, near Ashtalakshmi Temple, RK Puram, Kothapet, Hyderabad, Telangana 500035</span>
                             </motion.li>
                             <motion.li
                                 className="flex items-center"
                                 whileHover={{ x: 5 }}
                             >
-                                <Clock className="mr-3 text-[#FDDD3F]" size={20} />
+                                <Clock className="mr-3 text-[#9f1d21]" size={20} />
                                 <span>Mon-Fri: 10AM-10PM, Weekends: 9AM-11PM</span>
                             </motion.li>
                         </ul>
@@ -207,7 +206,7 @@ const Contact = () => {
                         <div className="mt-6 flex space-x-4">
                             <motion.a
                                 href="#"
-                                className="bg-[#FDDD3F] text-black p-2 rounded-full transition-all"
+                                className="bg-[#9f1d21] text-white p-2 rounded-full transition-all"
                                 whileHover={{ scale: 1.2 }}
                                 whileTap={{ scale: 0.9 }}
                             >
@@ -217,7 +216,7 @@ const Contact = () => {
                             </motion.a>
                             <motion.a
                                 href="#"
-                                className="bg-[#FDDD3F] text-black p-2 rounded-full transition-all"
+                                className="bg-[#9f1d21] text-white p-2 rounded-full transition-all"
                                 whileHover={{ scale: 1.2 }}
                                 whileTap={{ scale: 0.9 }}
                             >
@@ -227,7 +226,7 @@ const Contact = () => {
                             </motion.a>
                             <motion.a
                                 href="#"
-                                className="bg-[#FDDD3F] text-black p-2 rounded-full transition-all"
+                                className="bg-[#9f1d21] text-white p-2 rounded-full transition-all"
                                 whileHover={{ scale: 1.2 }}
                                 whileTap={{ scale: 0.9 }}
                             >
@@ -240,13 +239,13 @@ const Contact = () => {
 
                     {/* Contact Form */}
                     <motion.div
-                        className="bg-gray-900 p-6 rounded-lg shadow-lg border-2 border-[#FDDD3F]"
+                        className="bg-gray-100 p-6 rounded-lg shadow-lg border-2 border-yellow-400"
                         initial={{ x: 50, opacity: 0 }}
                         animate={{ x: 0, opacity: 1 }}
                         transition={{ duration: 0.5 }}
-                        whileHover={{ boxShadow: '0 0 15px #FDDD3F' }}
+                        whileHover={{ boxShadow: '0 0 15px rgba(234, 179, 8, 0.5)' }}
                     >
-                        <h3 className="text-xl md:text-2xl font-bold mb-4 text-[#FDDD3F]">Send us a Message</h3>
+                        <h3 className="text-xl md:text-2xl font-bold mb-4 text-[#9f1d21]">Send us a Message</h3>
                         <form onSubmit={handleSubmit}>
                             <div className="mb-4">
                                 <label htmlFor="name" className="block text-sm font-medium mb-1">Your Name</label>
@@ -256,7 +255,7 @@ const Contact = () => {
                                     name="name"
                                     value={formData.name}
                                     onChange={handleChange}
-                                    className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-[#FDDD3F]"
+                                    className="w-full px-3 py-2 bg-white border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#9f1d21]"
                                     required
                                 />
                             </div>
@@ -268,7 +267,7 @@ const Contact = () => {
                                     name="email"
                                     value={formData.email}
                                     onChange={handleChange}
-                                    className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-[#FDDD3F]"
+                                    className="w-full px-3 py-2 bg-white border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#9f1d21]"
                                     required
                                 />
                             </div>
@@ -280,7 +279,7 @@ const Contact = () => {
                                     name="phone"
                                     value={formData.phone}
                                     onChange={handleChange}
-                                    className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-[#FDDD3F]"
+                                    className="w-full px-3 py-2 bg-white border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#9f1d21]"
                                 />
                             </div>
                             <div className="mb-4">
@@ -291,13 +290,13 @@ const Contact = () => {
                                     value={formData.message}
                                     onChange={handleChange}
                                     rows="4"
-                                    className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-[#FDDD3F]"
+                                    className="w-full px-3 py-2 bg-white border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#9f1d21]"
                                     required
                                 ></textarea>
                             </div>
                             <motion.button
                                 type="submit"
-                                className="w-full bg-[#FDDD3F] text-black font-bold py-2 px-4 rounded-md hover:bg-opacity-90 transition-colors flex items-center justify-center"
+                                className="w-full bg-[#9f1d21] text-white font-bold py-2 px-4 rounded-md hover:bg-opacity-90 transition-colors flex items-center justify-center"
                                 whileHover={{ scale: 1.02 }}
                                 whileTap={{ scale: 0.98 }}
                             >

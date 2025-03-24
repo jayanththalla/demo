@@ -38,18 +38,17 @@ const WhyChooseUs = () => {
     ];
 
     return (
-        <div className="relative py-24 overflow-hidden bg-black">
-            {/* Background with reliable placeholder */}
+        <div className="relative py-24 overflow-hidden ">
+            {/* Background with reliable placeholder - removed opacity and changed z-index */}
             <div className="absolute inset-0 z-0 overflow-hidden">
-                <div className="absolute top-0 right-0 w-full h-full opacity-10 bg-pattern">
-                    {/* Using placeholder image since the original wasn't showing */}
-                    <img src="/binge-n-bash/public/assets/2.png" alt="Filmstrip Background" className="w-full h-full object-cover" />
+                <div className="absolute -top-10 right-0 w-full h-full bg-pattern">
+                    <img src="/assets/2.png" alt="Filmstrip Background" className="w-full h-full object-cover" />
                 </div>
             </div>
 
             {/* Decorative elements */}
-            <div className="absolute top-0 left-0 w-32 h-32 bg-red-700 opacity-10 rounded-full -translate-x-16 -translate-y-16"></div>
-            <div className="absolute bottom-0 right-0 w-64 h-64 bg-red-700 opacity-10 rounded-full translate-x-24 translate-y-24"></div>
+            <div className="absolute top-0 left-0 w-32 h-32 bg-yellow-500 opacity-10 rounded-full -translate-x-16 -translate-y-16 z-1"></div>
+            <div className="absolute bottom-0 right-0 w-64 h-64 bg-yellow-500 opacity-10 rounded-full translate-x-24 translate-y-24 z-1"></div>
 
             <div className="container mx-auto px-4 relative z-10">
                 <motion.div
@@ -58,8 +57,8 @@ const WhyChooseUs = () => {
                     transition={{ duration: 0.8 }}
                     className="text-center mb-16"
                 >
-                    <h2 className="text-4xl md:text-5xl font-bold">
-                        Why choose <span className="text-[#FACC15] relative">
+                    <h2 className="text-4xl md:text-5xl font-bold text-black">
+                        Why choose <span className="text-yellow-500 relative">
                             us?
                             <span className="absolute bottom-1 left-0 w-full h-2 bg-red-200 -z-10"></span>
                         </span>
@@ -79,15 +78,15 @@ const WhyChooseUs = () => {
                             }}
                             className="bg-white rounded-xl p-8 shadow-lg border border-gray-100 flex"
                         >
-                            <div className="bg-[#FACC15] text-black font-bold text-2xl w-16 h-16 flex items-center justify-center rounded-lg mr-5 shrink-0">
+                            <div className="bg-yellow-500 text-black font-bold text-2xl w-16 h-16 flex items-center justify-center rounded-lg mr-5 shrink-0">
                                 {feature.number}
                             </div>
                             <div>
                                 <div className="flex items-center gap-2 mb-3">
-                                    <span className="text-[#FACC15]">{feature.icon}</span>
-                                    <h3 className="text-2xl font-bold text-gray-600">{feature.title}</h3>
+                                    <span className="text-[#9f1d21]">{feature.icon}</span>
+                                    <h3 className="text-2xl font-bold text-black">{feature.title}</h3>
                                 </div>
-                                <p className="text-gray-600 leading-relaxed">{feature.description}</p>
+                                <p className="text-black leading-relaxed">{feature.description}</p>
                             </div>
                         </motion.div>
                     ))}
@@ -101,7 +100,7 @@ const WhyChooseUs = () => {
                 >
                     <a
                         href="/about"
-                        className="group px-8 py-4 border-2 border-[#FACC15] text-[#FACC15] rounded-lg hover:bg-[#FACC15] hover:text-black transition-all duration-300 font-medium text-lg min-w-40 text-center relative overflow-hidden"
+                        className="group px-8 py-4 border-2 border-[#9f1d21] text-[#9f1d21] rounded-lg hover:bg-[#9f1d21] hover:text-white transition-all duration-300 font-medium text-lg min-w-40 text-center relative overflow-hidden"
                     >
                         <span className="relative z-10 flex items-center justify-center gap-2">
                             Know more
@@ -112,7 +111,7 @@ const WhyChooseUs = () => {
                     </a>
                     <a
                         href="/book"
-                        className="group px-8 py-4 bg-[#FACC15] text-black rounded-lg hover:bg-yellow-400 transition-all duration-300 font-medium text-lg min-w-40 text-center shadow-lg shadow-yellow-500/20"
+                        className="group px-8 py-4 bg-[#9f1d21] text-white rounded-lg hover:bg-red-800 transition-all duration-300 font-medium text-lg min-w-40 text-center shadow-lg shadow-red-500/20"
                     >
                         <span className="flex items-center justify-center gap-2">
                             Book now
@@ -132,8 +131,8 @@ const WhyChooseUs = () => {
                     transition={{ duration: 0.8 }}
                     className="text-center mb-16"
                 >
-                    <h2 className="text-4xl md:text-5xl font-bold">
-                        Add <span className="text-[#FACC15] relative">
+                    <h2 className="text-4xl md:text-5xl font-bold text-black">
+                        Add <span className="text-yellow-500 relative">
                             ons
                             <span className="absolute bottom-1 left-0 w-full h-2 bg-red-200 -z-10"></span>
                         </span>

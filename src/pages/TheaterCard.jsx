@@ -9,8 +9,11 @@ const TheaterCard = ({ ...props }) => {
         setSelectedTimeSlot,
         handleBookNow,
         timeSlots,
-        bookedTimeslots = [] // Default to an empty array
+        bookedTimeSlots = {} // Default to an empty object
     } = props;
+
+    const theaterBookedSlots = bookedTimeSlots[theater.id] || [];
+    console.log('Booked slots for theater', theater.id, ':', theaterBookedSlots); // Debugging
 
     return (
         <motion.div
@@ -18,7 +21,7 @@ const TheaterCard = ({ ...props }) => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: theater.id * 0.1 }}
             whileHover={{ y: -10, transition: { duration: 0.2 } }}
-            className="bg-gray-900 border-2 border-yellow-400 rounded-lg overflow-hidden shadow-lg shadow-yellow-400/10 h-full flex flex-col"
+            className="bg-white border-2 border-yellow-400 rounded-lg overflow-hidden shadow-lg shadow-yellow-400/10 h-full flex flex-col"
         >
             {/* Theater Card Content */}
             <div className="relative h-48 overflow-hidden">
@@ -30,19 +33,19 @@ const TheaterCard = ({ ...props }) => {
                 <div className="absolute top-2 left-2 bg-yellow-400 text-black text-xs font-bold px-2 py-1 rounded flex items-center">
                     <Users size={14} className="mr-1" /> {theater.maxPeople} SEATS
                 </div>
-                <div className="absolute top-2 right-2 bg-black/80 border border-yellow-400 text-white text-xs font-bold px-2 py-1 rounded flex items-center">
+                {/* <div className="absolute top-2 right-2 bg-white/80 border border-yellow-400 text-black text-xs font-bold px-2 py-1 rounded flex items-center">
                     <Clock size={14} className="mr-1" /> 3 HRS
-                </div>
+                </div> */}
                 {theater.specialFeature && (
-                    <div className="absolute bottom-0 left-0 right-0 bg-black/70 text-yellow-400 text-sm font-bold py-1 text-center">
-                        <Sparkles size={16} className="inline mr-1" /> {theater.specialFeature}
+                    <div className="absolute bottom-0 left-0 right-0 bg-white/70 text-black text-sm font-bold py-1 text-center">
+                        <Sparkles size={16} className="inline mr-1 text-yellow-400" /> {theater.specialFeature}
                     </div>
                 )}
             </div>
 
-            <div className="p-4 bg-gray-900 text-white flex-grow flex flex-col">
+            <div className="p-4 bg-white text-black flex-grow flex flex-col">
                 <div className="flex justify-between items-center mb-2">
-                    <p className="text-yellow-400 font-bold flex items-center">
+                    <p className="text-black font-bold flex items-center">
                         ₹{theater.basePrice}/-
                     </p>
                     <div className="flex">
@@ -76,7 +79,7 @@ const TheaterCard = ({ ...props }) => {
 
                 <div className="flex flex-wrap gap-1 mb-4">
                     {theater.features.map((feature, idx) => (
-                        <span key={idx} className="text-xs bg-gray-800 text-yellow-400 px-2 py-1 rounded-full">
+                        <span key={idx} className="text-xs bg-gray-100 text-black px-2 py-1 rounded-full border border-yellow-400">
                             {feature}
                         </span>
                     ))}
@@ -88,8 +91,9 @@ const TheaterCard = ({ ...props }) => {
                     </p>
                     <div className="grid grid-cols-2 gap-1 mb-3">
                         {timeSlots.map((slot, index) => {
-                            const slotId = `${theater.id}-${index}`;
-                            const isBooked = bookedTimeslots.includes(slotId);
+                            const slotId = `${theater.id}-${index}`; // Ensure this matches the format in bookedTimeSlots
+                            const isBooked = theaterBookedSlots.includes(slotId); // Check if the slot is booked
+
                             return (
                                 <motion.div
                                     key={index}
@@ -100,17 +104,17 @@ const TheaterCard = ({ ...props }) => {
                                     transition={{ delay: index * 0.1 }}
                                     onClick={() => !isBooked && setSelectedTimeSlot(slotId)}
                                     className={`text-xs p-2 border border-yellow-400 rounded text-center cursor-pointer transition-all ${selectedTimeSlot === slotId
-                                            ? 'bg-yellow-400 text-black font-bold'
-                                            : isBooked
-                                                ? 'bg-gray-700 text-gray-400 cursor-not-allowed'
-                                                : 'hover:bg-yellow-400/20'
+                                        ? 'bg-yellow-400 text-black font-bold'
+                                        : isBooked
+                                            ? 'bg-gray-200 text-gray-400 cursor-not-allowed opacity-50'
+                                            : 'hover:bg-yellow-400/20'
                                         }`}
                                     style={{ pointerEvents: isBooked ? 'none' : 'auto' }}
                                     role="button"
                                     aria-label={`Select time slot ${slot}`}
                                     aria-disabled={isBooked}
                                 >
-                                    {slot} {isBooked && '(Booked)'}
+                                    {slot}
                                 </motion.div>
                             );
                         })}
@@ -119,7 +123,7 @@ const TheaterCard = ({ ...props }) => {
                         whileHover={{ scale: 1.03 }}
                         whileTap={{ scale: 0.97 }}
                         onClick={() => handleBookNow(theater.id)}
-                        className="w-full bg-yellow-400 text-black py-2 font-bold rounded hover:bg-yellow-300 transition-colors flex items-center justify-center"
+                        className="w-full bg-[#9f1d21] text-white py-2 font-bold rounded hover:bg-[#b82329] transition-colors flex items-center justify-center"
                     >
                         <Calendar className="mr-2" size={18} />
                         Book now
@@ -148,11 +152,11 @@ TheaterCard.propTypes = {
     setSelectedTimeSlot: PropTypes.func.isRequired,
     handleBookNow: PropTypes.func.isRequired,
     timeSlots: PropTypes.arrayOf(PropTypes.string).isRequired,
-    bookedTimeslots: PropTypes.arrayOf(PropTypes.string) // Add prop type validation
+    bookedTimeSlots: PropTypes.object // Update prop type to object
 };
 
 TheaterCard.defaultProps = {
-    bookedTimeslots: [] // Default to an empty array
+    bookedTimeSlots: {} // Default to an empty object
 };
 
 export default TheaterCard;

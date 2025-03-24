@@ -14,23 +14,30 @@ const Tabs = ({ activeTab, setActiveTab }) => {
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={() => setActiveTab('theaters')}
-                className={`py-3 px-8 mr-4 rounded-lg font-bold transition-all duration-300 flex items-center ${activeTab === 'theaters' ? 'bg-yellow-400 text-black shadow-lg shadow-yellow-400/30' : 'bg-gray-800 hover:bg-gray-700'}`}
+                className={`py-3 px-8 mr-4 rounded-lg font-bold transition-all duration-300 flex items-center ${activeTab === 'theaters'
+                        ? 'bg-yellow-400 text-black shadow-lg shadow-yellow-400/30'
+                        : 'bg-white border border-gray-300 text-black hover:bg-gray-100'
+                    }`}
             >
-                <Film className="mr-2" size={20} />
+                <Film className={`mr-2 ${activeTab === 'theaters' ? 'text-black' : 'text-gray-700'}`} size={20} />
                 Private Theaters
             </motion.button>
             <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={() => setActiveTab('party')}
-                className={`py-3 px-8 rounded-lg font-bold transition-all duration-300 flex items-center ${activeTab === 'party' ? 'bg-yellow-400 text-black shadow-lg shadow-yellow-400/30' : 'bg-gray-800 hover:bg-gray-700'}`}
+                className={`py-3 px-8 rounded-lg font-bold transition-all duration-300 flex items-center ${activeTab === 'party'
+                        ? 'bg-yellow-400 text-black shadow-lg shadow-yellow-400/30'
+                        : 'bg-white border border-gray-300 text-black hover:bg-gray-100'
+                    }`}
             >
-                <Music className="mr-2" size={20} />
+                <Music className={`mr-2 ${activeTab === 'party' ? 'text-black' : 'text-gray-700'}`} size={20} />
                 Party Hall
             </motion.button>
         </motion.div>
     );
 };
+
 Tabs.propTypes = {
     activeTab: PropTypes.string.isRequired,
     setActiveTab: PropTypes.func.isRequired

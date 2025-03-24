@@ -1,66 +1,80 @@
 import { useState, useEffect } from 'react';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
 import PropTypes from 'prop-types';
+import { cakeOptions } from './data/constants';
 
-const CakeSelector = ({ onSelect, onBack, onNext }) => {
-    const [selectedCake, setSelectedCake] = useState(null);
-    const [isEggless, setIsEggless] = useState(false);
+const CakeSelector = ({ onSelect, onBack, onNext, selectedCake, isEggless }) => {
+    // Filter out the 'none' option from cakeOptions
+    const filteredCakes = cakeOptions.filter(cake => cake.id !== 'none');
 
-    const cakeOptions = [
-        { id: 'none', name: 'None', image: '/api/placeholder/400/320', price: 0 },
-        { id: 'vanilla', name: 'Vanilla', image: '/api/placeholder/400/320', price: 900 },
-        { id: 'pineapple', name: 'Pineapple', image: '/api/placeholder/400/320', price: 950 },
-        { id: 'mango', name: 'Mango', image: '/api/placeholder/400/320', price: 1000 },
-        { id: 'strawberry', name: 'Strawberry', image: '/api/placeholder/400/320', price: 950 },
-        { id: 'chocolate', name: 'Chocolate', image: '/api/placeholder/400/320', price: 950 },
-        { id: 'blackforest', name: 'Black Forest', image: '/api/placeholder/400/320', price: 950 },
-        { id: 'chocolatetruffle', name: 'Chocolate Truffle', image: '/api/placeholder/400/320', price: 1000 },
-        { id: 'whiteforest', name: 'White Forest', image: '/api/placeholder/400/320', price: 950 },
-        { id: 'butterscotch', name: 'Butterscotch', image: '/api/placeholder/400/320', price: 950 },
-    ];
+    const [selectedCakeLocal, setSelectedCakeLocal] = useState(selectedCake);
+    const [isEgglessLocal, setIsEgglessLocal] = useState(isEggless);
+
+    // Sync local state with props
+    useEffect(() => {
+        setSelectedCakeLocal(selectedCake);
+    }, [selectedCake]);
 
     useEffect(() => {
-        if (selectedCake) {
-            const cakeOption = cakeOptions.find(c => c.id === selectedCake);
-            onSelect(selectedCake !== 'none', cakeOption?.price || 0, isEggless);
+        setIsEgglessLocal(isEggless);
+    }, [isEggless]);
+
+    // Notify parent of changes
+    useEffect(() => {
+        const cakeOption = filteredCakes.find(c => c.id === selectedCakeLocal);
+        const totalPrice = cakeOption?.price || 0;
+
+        // Pass the actual cake ID instead of a boolean
+        onSelect(selectedCakeLocal, totalPrice, isEgglessLocal);
+    }, [selectedCakeLocal, isEgglessLocal, onSelect, filteredCakes]);
+
+    // Toggle cake selection
+    const toggleCake = (id) => {
+        if (selectedCakeLocal === id) {
+            setSelectedCakeLocal(null); // Deselect if already selected
+        } else {
+            setSelectedCakeLocal(id); // Select the new cake
         }
-    }, [selectedCake, isEggless, onSelect, cakeOptions]);
+    };
 
     return (
-        <div className="py-6 bg-black text-white">
+        <div className="py-6 bg-white text-black">
+            {/* Header and Price Display */}
             <div className="flex items-center justify-between mb-6">
                 <div className="flex items-center">
                     <div className="w-8 h-1 bg-yellow-400 mr-3"></div>
                     <h2 className="text-2xl font-bold">Cakes</h2>
                 </div>
                 <div className="text-right">
-                    <div className="bg-black text-white border-2 border-yellow-400 px-4 py-2 rounded font-bold">
-                        Price: {selectedCake ? `₹${cakeOptions.find(c => c.id === selectedCake)?.price || 0}` : '₹0'}
+                    <div className="bg-white text-black border-2 border-yellow-400 px-4 py-2 rounded font-bold">
+                        Price: ₹{filteredCakes.find(c => c.id === selectedCakeLocal)?.price || 0}
                     </div>
                 </div>
             </div>
 
-            <div className="mb-6 flex items-center">
-                <span className="mr-3">Eggless</span>
+            {/* Eggless Toggle */}
+            {/* <div className="mb-6 flex items-center">
+                <span className="mr-3 font-medium">Eggless</span>
                 <label className="relative inline-flex items-center cursor-pointer">
                     <input
                         type="checkbox"
-                        checked={isEggless}
-                        onChange={() => setIsEggless(!isEggless)}
+                        checked={isEgglessLocal}
+                        onChange={() => setIsEgglessLocal(!isEgglessLocal)}
                         className="sr-only peer"
                     />
-                    <div className="w-11 h-6 bg-gray-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-yellow-400"></div>
+                    <div className="w-11 h-6 bg-gray-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-yellow-400"></div>
                 </label>
-            </div>
+            </div> */}
 
+            {/* Cake Options */}
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-                {cakeOptions.map((cake) => (
+                {filteredCakes.map((cake) => (
                     <div
                         key={cake.id}
-                        onClick={() => setSelectedCake(cake.id)}
+                        onClick={() => toggleCake(cake.id)}
                         className={`
                             relative rounded-lg overflow-hidden cursor-pointer border-2
-                            ${selectedCake === cake.id ? 'border-yellow-400 ring-2 ring-yellow-400' : 'border-white'}
+                            ${selectedCakeLocal === cake.id ? 'border-yellow-400 ring-2 ring-yellow-400' : 'border-gray-300'}
                         `}
                     >
                         <img
@@ -68,29 +82,21 @@ const CakeSelector = ({ onSelect, onBack, onNext }) => {
                             alt={cake.name}
                             className="w-full h-32 object-cover"
                         />
-                        {cake.id !== 'none' && (
-                            <div className="absolute top-2 right-2 bg-black text-white text-xs font-bold px-2 py-1 rounded border border-yellow-400">
-                                ₹{cake.price}
-                            </div>
-                        )}
-                        <div className={`
-                            text-center py-2 font-medium text-sm bg-black
-                            ${cake.id === 'none' ? 'border-t-2 border-yellow-400' : ''}
-                        `}>
+                        <div className="absolute top-2 right-2 bg-white text-black text-xs font-bold px-2 py-1 rounded border border-yellow-400">
+                            ₹{cake.price}
+                        </div>
+                        <div className="text-center py-2 font-medium text-sm bg-white border-t border-gray-200">
                             {cake.name}
                         </div>
                     </div>
                 ))}
             </div>
 
-            <div className="mt-6 text-sm text-white">
-                NOTE : Above images are for demonstration purposes only. Actual cake may look different.
-            </div>
-
+            {/* Buttons */}
             <div className="mt-6 flex justify-between">
                 <button
                     onClick={onBack}
-                    className="px-6 py-3 border-2 border-yellow-400 text-white rounded flex items-center hover:bg-yellow-400 hover:text-black transition-colors"
+                    className="px-6 py-3 border-2 border-[#9f1d21] text-[#9f1d21] rounded flex items-center hover:bg-[#9f1d21] hover:text-white transition-colors"
                 >
                     <ArrowLeft size={18} className="mr-2" />
                     Previous
@@ -98,9 +104,9 @@ const CakeSelector = ({ onSelect, onBack, onNext }) => {
 
                 <button
                     onClick={onNext}
-                    disabled={!selectedCake}
-                    className={`px-6 py-3 bg-yellow-400 text-black rounded flex items-center hover:bg-white hover:text-black hover:border-yellow-400 transition-colors
-                        ${!selectedCake ? 'opacity-50 cursor-not-allowed' : ''}
+                    disabled={!selectedCakeLocal}
+                    className={`px-6 py-3 bg-[#9f1d21] text-white rounded flex items-center hover:bg-[#b82329] transition-colors
+                        ${!selectedCakeLocal ? 'opacity-50 cursor-not-allowed' : ''}
                     `}
                 >
                     Next
@@ -114,7 +120,9 @@ const CakeSelector = ({ onSelect, onBack, onNext }) => {
 CakeSelector.propTypes = {
     onSelect: PropTypes.func.isRequired,
     onBack: PropTypes.func.isRequired,
-    onNext: PropTypes.func.isRequired
+    onNext: PropTypes.func.isRequired,
+    selectedCake: PropTypes.string,
+    isEggless: PropTypes.bool
 };
 
 export default CakeSelector;

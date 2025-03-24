@@ -7,17 +7,19 @@ const BookHeader = () => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 1 }}
-            className="relative w-full bg-black py-8 overflow-hidden"
+            className="relative w-full bg-white overflow-hidden mt-16"
             style={{ height: '350px' }}
         >
-            {/* Parallax Background */}
+            {/* Background Image */}
             <motion.div
-                initial={{ y: 0 }}
-                animate={{ y: -20 }}
-                transition={{ repeat: Infinity, repeatType: "reverse", duration: 10 }}
-                className="absolute inset-0 z-0"
+                className="absolute inset-0 z-0 overflow-hidden"
             >
-                <img src="/assets/reel.png" alt="Cinema Background" className="w-full h-full object-cover opacity-40" />
+                <img
+                    src="/assets/reel.png"
+                    alt="Cinema Background"
+                    className="w-full h-full object-cover "
+                    style={{ objectPosition: 'center center' }}
+                />
             </motion.div>
 
             {/* Film Reel Animation */}
@@ -46,12 +48,12 @@ const BookHeader = () => {
                 initial={{ y: 50, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
                 transition={{ duration: 0.8, delay: 0.3 }}
-                className="container mx-auto px-4 text-center py-6 z-10 relative h-full flex flex-col justify-center"
+                className="container mx-auto px-4 text-center z-10 relative h-full flex flex-col justify-center"
             >
                 <h1 className="text-3xl md:text-5xl font-bold mb-4 text-white tracking-wide">
                     <span className="text-yellow-400">BingeHall</span> Booking
                 </h1>
-                <p className="text-lg md:text-xl text-gray-300 max-w-2xl mx-auto">
+                <p className="text-lg md:text-xl text-white max-w-2xl mx-auto">
                     Where movie magic meets luxury. Reserve your exclusive private theatre experience today.
                 </p>
 

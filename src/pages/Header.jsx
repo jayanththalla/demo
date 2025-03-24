@@ -12,9 +12,19 @@ const Header = () => {
             setScrolled(window.scrollY > 20);
         };
 
-        window.addEventListener('scroll', handleScroll);
-        return () => window.removeEventListener('scroll', handleScroll);
+        const debouncedHandleScroll = debounce(handleScroll, 100);
+
+        window.addEventListener('scroll', debouncedHandleScroll);
+        return () => window.removeEventListener('scroll', debouncedHandleScroll);
     }, []);
+
+    const debounce = (func, wait) => {
+        let timeout;
+        return function (...args) {
+            clearTimeout(timeout);
+            timeout = setTimeout(() => func.apply(this, args), wait);
+        };
+    };
 
     const navLinks = [
         { name: 'Home', path: '/' },
@@ -27,8 +37,8 @@ const Header = () => {
 
     return (
         <header
-            className={`fixed w-full z-50 transition-all duration-300 ${scrolled ? 'bg-black/90 backdrop-blur-sm py-4' : 'bg-transparent py-6'
-                }`}
+            className={`fixed w-full z-50 transition-all duration-200 ${scrolled ? 'bg-white/90 backdrop-blur-sm shadow-md' : 'bg-white'
+                } py-4`}
         >
             <div className="container mx-auto px-4">
                 <nav className="flex items-center justify-between">
@@ -37,10 +47,11 @@ const Header = () => {
                         to="/"
                         className="flex items-center group"
                     >
-                        <span className="text-2xl font-bold text-white group-hover:text-yellow-400 transition-colors duration-300">
-                            Binge
-                            <span className="text-yellow-400 group-hover:text-white transition-colors duration-300">Hall</span>
-                        </span>
+                        <img
+                            src="/assets/logo.png"
+                            alt="Binge Hall"
+                            className="h-10 md:h-14"
+                        />
                     </Link>
 
                     {/* Desktop Navigation */}
@@ -50,20 +61,22 @@ const Header = () => {
                                 key={link.name}
                                 to={link.path}
                                 className={`relative text-lg transition-colors duration-300 ${isActive(link.path)
-                                    ? 'text-yellow-400'
-                                    : 'text-white hover:text-yellow-400'
+                                    ? 'text-[#9f1d21]'
+                                    : 'text-black hover:text-[#9f1d21]'
                                     }`}
                             >
                                 {link.name}
-                                <span className={`absolute left-0 right-0 bottom-0 h-0.5 bg-yellow-400 transform origin-left transition-transform duration-300 ${isActive(link.path) ? 'scale-x-100' : 'scale-x-0'
-                                    } group-hover:scale-x-100`} />
+                                <span
+                                    className={`absolute left-0 right-0 bottom-0 h-0.5 bg-[#9f1d21] transform origin-left transition-transform duration-300 ${isActive(link.path) ? 'scale-x-100' : 'scale-x-0'
+                                        } group-hover:scale-x-100`}
+                                />
                             </Link>
                         ))}
                         <Link
                             to="/book"
-                            className="bg-yellow-400 text-black px-6 py-2 rounded-full font-semibold 
-                         hover:bg-yellow-300 transform hover:-translate-y-0.5 transition-all duration-300
-                         active:scale-95"
+                            className="bg-[#9f1d21] text-white px-6 py-2 rounded-full font-semibold 
+                             hover:bg-[#b12329] transform hover:-translate-y-0.5 transition-all duration-300
+                             active:scale-95"
                         >
                             Book Now
                         </Link>
@@ -71,7 +84,7 @@ const Header = () => {
 
                     {/* Mobile Menu Button */}
                     <button
-                        className="md:hidden text-white hover:text-yellow-400 transition-colors"
+                        className="md:hidden text-black hover:text-[#9f1d21] transition-colors"
                         onClick={() => setIsOpen(!isOpen)}
                     >
                         {isOpen ? <X size={24} /> : <Menu size={24} />}
@@ -79,18 +92,20 @@ const Header = () => {
                 </nav>
 
                 {/* Mobile Navigation */}
-                <div className={`md:hidden transition-all duration-300 ease-in-out ${isOpen
-                    ? 'max-h-96 opacity-100 mt-4'
-                    : 'max-h-0 opacity-0 pointer-events-none'
-                    }`}>
+                <div
+                    className={`md:hidden transition-all duration-300 ease-in-out ${isOpen
+                        ? 'max-h-96 opacity-100 mt-4'
+                        : 'max-h-0 opacity-0 pointer-events-none'
+                        }`}
+                >
                     <div className="flex flex-col space-y-4 py-4">
                         {navLinks.map((link) => (
                             <Link
                                 key={link.name}
                                 to={link.path}
                                 className={`text-lg transition-colors duration-300 ${isActive(link.path)
-                                    ? 'text-yellow-400'
-                                    : 'text-white hover:text-yellow-400'
+                                    ? 'text-[#9f1d21]'
+                                    : 'text-black hover:text-[#9f1d21]'
                                     }`}
                                 onClick={() => setIsOpen(false)}
                             >
@@ -99,8 +114,8 @@ const Header = () => {
                         ))}
                         <Link
                             to="/book"
-                            className="bg-yellow-400 text-black px-6 py-2 rounded-full font-semibold text-center
-                         hover:bg-yellow-300 transform hover:-translate-y-0.5 transition-all duration-300"
+                            className="bg-[#9f1d21] text-white px-6 py-2 rounded-full font-semibold text-center
+                             hover:bg-[#b12329] transform hover:-translate-y-0.5 transition-all duration-300"
                             onClick={() => setIsOpen(false)}
                         >
                             Book Now

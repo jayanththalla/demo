@@ -1,5 +1,5 @@
 // src/utils/firestore.js
-import { db } from '../firebase'; // Ensure Firebase is initialized
+import { db } from '../services/firebase'; // Ensure Firebase is initialized
 import { collection, addDoc } from 'firebase/firestore';
 
 export const addBooking = async (bookingDetails) => {
