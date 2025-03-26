@@ -29,7 +29,7 @@ const BookingConfirmation = ({
 
     // Ensure advance amount is within valid range
     useEffect(() => {
-        const minAdvance = 500;
+        const minAdvance = 5;
         const maxAdvance = finalPrice - 1;
 
         if (advanceAmount < minAdvance) {
@@ -272,7 +272,7 @@ const BookingConfirmation = ({
                                             type="number"
                                             value={advanceAmount}
                                             onChange={(e) => {
-                                                const value = Math.max(500, Number(e.target.value));
+                                                const value = Math.max(5, Number(e.target.value));
                                                 setAdvanceAmount(Math.min(finalPrice - 1, value));
                                             }}
                                             min={500}
