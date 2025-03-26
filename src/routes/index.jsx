@@ -7,6 +7,9 @@ import Gallery from '../pages/Gallery';
 import Contact from '../pages/Contact';
 import Book from '../pages/Book';
 import AdminDashboard from '../pages/admin/admin';
+import TermsAndConditions from '../pages/other/terms';
+import PrivacyPolicy from '../pages/other/privacy';
+import RefundPolicy from '../pages/other/refund';
 export const router = createBrowserRouter([
     {
         path: '/',
@@ -35,6 +38,18 @@ export const router = createBrowserRouter([
             {
                 path: 'admin',
                 element: <AdminDashboard />,
+            },
+            {
+                path: 'terms',
+                element: <TermsAndConditions />,
+            },
+            {
+                path: 'privacy',
+                element: <PrivacyPolicy />,
+            },
+            {
+                path: 'refund',
+                element: <RefundPolicy />,
             }
         ],
     },

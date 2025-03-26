@@ -26,10 +26,10 @@ const LandingPage = () => {
 
     return (
         <div className="min-h-screen bg-white text-black">
-            {/* Hero Section */}
-            <div className="relative min-h-screen flex items-center">
+            {/* Hero Section - Fixed to eliminate gap */}
+            <div className="relative min-h-screen flex items-center -mt-16 pt-16">
                 <div className="absolute inset-0 z-10" />
-                <div className="absolute inset-0 bg-[url('/assets/front.jpg')] bg-cover bg-center opacity-80" />
+                <div className="absolute inset-0 bg-[url('/assets/front.jpg')] bg-cover bg-center bg-no-repeat opacity-80" />
                 <div className="relative z-20 container mx-auto px-4 md:px-8 flex items-center py-16 md:py-0">
                     <div className="max-w-2xl">
                         <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold mb-4 md:mb-6">
@@ -117,7 +117,6 @@ const LandingPage = () => {
                     </Link>
                 </div>
             </div>
-
         </div>
     );
 };

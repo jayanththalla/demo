@@ -705,7 +705,7 @@ const Book = () => {
                             </svg>
                         </div>
                         <h3 className="text-2xl font-bold mb-2">Booking Successful!</h3>
-                        <p className="text-gray-700 mb-4">Your reservation has been confirmed. We&apos;ve sent the details to your email.</p>
+                        <p className="text-gray-700 mb-4">Your reservation has been confirmed.</p>
                         <p className="text-gray-700 mb-6">
                             Booking Time: {new Date().toLocaleString('en-US', {
                                 weekday: 'short',

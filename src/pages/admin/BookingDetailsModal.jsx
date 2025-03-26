@@ -51,8 +51,8 @@ const ActionButton = ({ label, onClick, variant = 'primary' }) => (
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
         className={`px-5 py-2.5 rounded-lg font-medium ${variant === 'primary'
-                ? 'bg-blue-600 text-white'
-                : 'bg-gray-200 text-gray-700'
+            ? 'bg-blue-600 text-white'
+            : 'bg-gray-200 text-gray-700'
             }`}
         onClick={onClick}
     >
@@ -213,13 +213,13 @@ const PaymentSection = ({ booking }) => {
                 <PaymentHistory payments={booking.paymentHistory || []} />
             </div>
 
-            {/* Add Payment Button (if you want to add manual payments) */}
+            {/* Add Payment Button (if you want to add manual payments)
             <div className="flex justify-end">
                 <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2">
                     <Plus size={16} />
                     Record Manual Payment
                 </button>
-            </div>
+            </div> */}
         </div>
     );
 };
