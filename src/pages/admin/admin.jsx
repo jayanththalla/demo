@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Bell, Settings, Filter, Search, BarChart } from 'lucide-react';
+import { Bell, Settings, Filter, Search, BarChart, Eye, EyeOff } from 'lucide-react';
+
 import { getAllBookings } from '../../services/bookingService';
 import StatsCards from './StatsCards';
 import BookingsTable from './BookingsTable';
@@ -14,6 +15,20 @@ const AdminDashboard = () => {
     const [statusFilter, setStatusFilter] = useState('all');
     const [loading, setLoading] = useState(true);
     const [showStats, setShowStats] = useState(true);
+
+    const [isAuthenticated, setIsAuthenticated] = useState(false);
+    const [password, setPassword] = useState('');
+    const [error, setError] = useState('');
+    const [showPassword, setShowPassword] = useState(false);
+    const handleLogin = (e) => {
+        e.preventDefault();
+        if (password === process.env.REACT_APP_ADMIN_PASSWORD) {
+            setIsAuthenticated(true);
+            setError('');
+        } else {
+            setError('Incorrect password');
+        }
+    };
 
     // Fetch all bookings
     useEffect(() => {
@@ -57,6 +72,54 @@ const AdminDashboard = () => {
 
         setFilteredBookings(filtered);
     }, [searchQuery, statusFilter, bookings]);
+
+    if (!isAuthenticated) {
+        return (
+            <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center p-6">
+                <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="bg-white p-8 rounded-xl shadow-lg max-w-md w-full"
+                >
+                    <h2 className="text-2xl font-bold text-gray-800 mb-6">Admin Login</h2>
+                    <form onSubmit={handleLogin}>
+                        <div className="mb-4 relative">
+                            <label htmlFor="password" className="block text-gray-700 mb-2">
+                                Password
+                            </label>
+                            <div className="relative">
+                                <input
+                                    type={showPassword ? "text" : "password"}
+                                    id="password"
+                                    value={password}
+                                    onChange={(e) => setPassword(e.target.value)}
+                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 pr-10"
+                                    required
+                                />
+                                <button
+                                    type="button"
+                                    className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600"
+                                    onClick={() => setShowPassword(!showPassword)}
+                                    aria-label={showPassword ? "Hide password" : "Show password"}
+                                >
+                                    {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                                </button>
+                            </div>
+                            {error && <p className="text-red-500 text-sm mt-1">{error}</p>}
+                        </div>
+                        <motion.button
+                            whileHover={{ scale: 1.02 }}
+                            whileTap={{ scale: 0.98 }}
+                            type="submit"
+                            className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors"
+                        >
+                            Login
+                        </motion.button>
+                    </form>
+                </motion.div>
+            </div>
+        );
+    }
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-6">

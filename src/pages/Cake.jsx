@@ -104,9 +104,7 @@ const CakeSelector = ({ onSelect, onBack, onNext, selectedCake, isEggless }) => 
 
                 <button
                     onClick={onNext}
-                    disabled={!selectedCakeLocal}
                     className={`px-6 py-3 bg-[#9f1d21] text-white rounded flex items-center hover:bg-[#b82329] transition-colors
-                        ${!selectedCakeLocal ? 'opacity-50 cursor-not-allowed' : ''}
                     `}
                 >
                     Next

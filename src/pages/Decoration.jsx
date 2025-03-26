@@ -85,9 +85,7 @@ const DecorationSelector = ({ onSelect, onBack, onNext, selectedDecorations }) =
 
                 <button
                     onClick={onNext}
-                    disabled={selectedDecorationsLocal.length === 0}
                     className={`px-6 py-3 bg-[#9f1d21] text-white rounded flex items-center hover:bg-[#b82329] transition-colors
-                        ${selectedDecorationsLocal.length === 0 ? 'opacity-50 cursor-not-allowed' : ''}
                     `}
                 >
                     Next
