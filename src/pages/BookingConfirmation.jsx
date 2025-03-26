@@ -24,7 +24,7 @@ const BookingConfirmation = ({
     photography,
 }) => {
     const [selectedPayment, setSelectedPayment] = useState('full');
-    const [advanceAmount, setAdvanceAmount] = useState(Math.max(500, Math.floor(finalPrice * 0.3)));
+    const [advanceAmount, setAdvanceAmount] = useState(Math.max(5, Math.floor(finalPrice * 0.3)));
     const [showPaymentSection, setShowPaymentSection] = useState(false);
 
     // Ensure advance amount is within valid range
