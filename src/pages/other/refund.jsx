@@ -99,7 +99,7 @@ const RefundPolicy = () => {
                         <div className="bg-gray-50 p-6 rounded-lg border-l-4 border-[#9f1d21] text-center">
                             <h3 className="text-xl font-semibold text-gray-900 mb-4">Need Assistance?</h3>
                             <p className="mb-4">
-                                Email us at <strong>bingehall08@gmail.com</strong> or call <strong>+919100111403</strong>
+                                Email us at <strong>bingehall08@gmail.com</strong> or call <strong>+919100111402</strong>
                             </p>
                             <div className="flex flex-col sm:flex-row justify-center gap-4">
                                 <Link
@@ -109,7 +109,7 @@ const RefundPolicy = () => {
                                     Contact Form
                                 </Link>
                                 <a
-                                    href="tel:+919100111403"
+                                    href="tel:+919100111402"
                                     className="border border-[#9f1d21] text-[#9f1d21] px-6 py-2 rounded-full font-semibold hover:bg-[#9f1d21]/10 transition-colors"
                                 >
                                     Call Now

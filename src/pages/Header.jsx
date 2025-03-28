@@ -39,7 +39,7 @@ const Header = () => {
     const isActive = (path) => location.pathname === path;
 
     const openWhatsApp = () => {
-        window.open('https://wa.me/919100111403', '_blank');
+        window.open('https://wa.me/919100111402', '_blank');
     };
 
     return (

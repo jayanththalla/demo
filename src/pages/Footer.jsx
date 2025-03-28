@@ -83,7 +83,7 @@ const Footer = () => {
 
     // Function to open WhatsApp chat
     const openWhatsApp = () => {
-        window.open('https://wa.me/919100111403', '_blank');
+        window.open('https://wa.me/919100111402', '_blank');
     };
 
     return (
@@ -198,11 +198,11 @@ const Footer = () => {
                             </p>
                             <p className="flex items-center">
                                 <Phone className="mr-2 text-[#9f1d21] flex-shrink-0" size={18} />
-                                <a href="tel:+919100111403" className="hover:text-[#9f1d21] transition-colors">+91 9100111403</a>
+                                <a href="tel:+919100111402" className="hover:text-[#9f1d21] transition-colors">+91 9100111402</a>
                             </p>
                             <p className="flex items-center">
                                 <Phone className="mr-2 text-[#9f1d21] flex-shrink-0" size={18} />
-                                <a href="tel:+919100111403" className="hover:text-[#9f1d21] transition-colors">+91 9100111402</a>
+                                <a href="tel:+919100111403" className="hover:text-[#9f1d21] transition-colors">+91 9100111403</a>
                             </p>
                             <p className="flex items-center">
                                 <Mail className="mr-2 text-[#9f1d21] flex-shrink-0" size={18} />
