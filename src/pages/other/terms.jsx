@@ -1,16 +1,40 @@
-import { Link } from 'react-router-dom';
+import { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 
 const TermsAndConditions = () => {
+    const [clicks, setClicks] = useState(0);
+    const navigate = useNavigate();
+
+    // Add secret trigger
+    const handleLogoClick = (e) => {
+        e.preventDefault();
+        setClicks(prev => {
+            if (prev === 2) { // On third click
+                setTimeout(() => {
+                    navigate('/admin');
+                }, 300);
+                return 0;
+            }
+            return prev + 1;
+        });
+
+        // Reset clicks after 2 seconds of inactivity
+        setTimeout(() => {
+            setClicks(0);
+        }, 2000);
+    };
+
     return (
         <div className="min-h-screen bg-gray-50 pt-24 pb-12 px-4 sm:px-6 lg:px-8">
             <div className="max-w-4xl mx-auto bg-white rounded-xl shadow-md overflow-hidden p-6 sm:p-8">
-                {/* Header */}
+                {/* Header - Modified with click handler */}
                 <div className="text-center mb-10">
                     <Link to="/" className="inline-block mb-6">
                         <img
                             src="/assets/logo.png"
                             alt="BingeHall"
-                            className="h-12 md:h-16"
+                            className="h-12 md:h-16 select-none"
+                            onClick={handleLogoClick}
                         />
                     </Link>
                     <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-2">Terms & Conditions</h1>
