@@ -10,10 +10,44 @@ const waitForRazorpay = () => {
         check();
     });
 };
+const RAZORPAY_LOAD_TIMEOUT = 5000; // 5 seconds
 
-export const openRazorpayPayment = async (orderDetails, onSuccess, onFailure) => {
+export const openRazorpayPayment = async (orderDetails, onSuccess, onFailure, onLoading) => {
     try {
+        if (typeof onLoading === 'function') onLoading();
         await waitForRazorpay();
+        const razorpayLoadPromise = new Promise((resolve, reject) => {
+            const timer = setTimeout(() => {
+                reject(new Error('Payment gateway timeout. Please try again.'));
+            }, RAZORPAY_LOAD_TIMEOUT);
+
+            const check = () => {
+                if (window.Razorpay) {
+                    clearTimeout(timer);
+                    resolve();
+                }
+            };
+
+            // Check immediately in case it's already loaded
+            check();
+
+            // Then check periodically
+            const interval = setInterval(check, 100);
+        });
+
+        await razorpayLoadPromise;
+        if (!window.Razorpay) {
+            // If not loaded, load it dynamically
+            const script = document.createElement('script');
+            script.src = "https://checkout.razorpay.com/v1/checkout.js";
+            script.async = true;
+
+            await new Promise((resolve, reject) => {
+                script.onload = resolve;
+                script.onerror = reject;
+                document.body.appendChild(script);
+            });
+        }
 
         // Validate amount (e.g., ₹1 = 100 paise)
         if (orderDetails.currency === 'INR' && orderDetails.amount < 100) {

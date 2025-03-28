@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronLeft, Check } from 'lucide-react';
 import BookHeader from './BookHeader';
 import Tabs from './Tabs';
 import TheaterCard from './TheaterCard';
@@ -11,10 +10,12 @@ import DecorationSelector from './Decoration';
 import CakeSelector from './Cake'; // Import the new CakeSelector component
 import AddOnsSelector from './Adds'; // Import the AddOnsSelector component
 import PartyHallDetails from './PartyHallDetails';
-import { saveBooking, reserveTimeSlot, fetchBookedSlots, updateBookingStatus, updateBookingPayment } from '../services/bookingService';
+import { saveBooking, reserveTimeSlot, fetchBookedSlots, updateBookingPayment } from '../services/bookingService';
 import BookingHeader from './BookingHeader';
 import BookingConfirmation from './BookingConfirmation';
 import { openRazorpayPayment } from '../utils/razorpay';
+import UserDetailsForm from '../components/UserDetailsForm';
+
 const Book = () => {
     const [activeTab, setActiveTab] = useState('theaters');
     const [bookingStep, setBookingStep] = useState('selection'); // 'selection', 'decoration', 'cake', 'addons', 'confirmation'
@@ -35,48 +36,61 @@ const Book = () => {
     const [selectedDate, setSelectedDate] = useState(new Date().toLocaleDateString());
     const [bookingDetails, setBookingDetails] = useState(null); // Add this state
     const [errors, setErrors] = useState({}); // State to store validation errors
-    const [showAddOnsOptions, setShowAddOnsOptions] = useState(false); // State for add-ons options visibility
-    const [showCakeOptions, setShowCakeOptions] = useState(false); // State for cake options visibility
-    const [selectedPayment, setSelectedPayment] = useState('full');
     const [paymentType, setPaymentType] = useState('full');
     const [paymentAmount, setPaymentAmount] = useState(0);
-    const [advanceAmount, setAdvanceAmount] = useState(Math.floor(finalPrice * 0.3));
     const quote = "Book your spot for an unforgettable experience today!";
-
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
     const [phone, setPhone] = useState('');
-
-    const startTimer = () => {
-        const interval = setInterval(() => {
-            setTimer((prev) => {
-                if (prev === 0) {
-                    clearInterval(interval);
-                    alert('Booking session expired. Please try again.');
-                    setBookingStep('selection');
-                    return 600;
-                }
-                return prev - 1;
-            });
-        }, 1000);
-    };
-
     const [isProcessing, setIsProcessing] = useState(false);
-
-    // In Book.jsx
     const handlePayment = async () => {
         const amountToPay = paymentType === 'full' ? finalPrice : paymentAmount;
-
         if (isProcessing) return;
         setIsProcessing(true);
 
+        setErrors({});
+
         try {
             // Validate inputs
-            if (!selectedTheater || !selectedTimeSlot || !name || !email || !phone) {
-                throw new Error('Please fill all required details');
+            const validationErrors = {};
+
+            if (!selectedTheater) {
+                validationErrors.theater = 'Please select a theater';
             }
 
-            // Prepare booking data
+            if (!selectedTimeSlot) {
+                validationErrors.timeSlot = 'Please select a time slot';
+            }
+
+            if (!name.trim()) {
+                validationErrors.name = 'Name is required';
+            }
+
+            if (!email.trim()) {
+                validationErrors.email = 'Email is required';
+            } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+                validationErrors.email = 'Please enter a valid email address';
+            }
+
+            if (!phone.trim()) {
+                validationErrors.phone = 'Phone number is required';
+            } else if (!/^\d{10}$/.test(phone)) {
+                validationErrors.phone = 'Phone number must be 10 digits';
+            }
+
+            if (Object.keys(validationErrors).length > 0) {
+                setErrors(validationErrors);
+                // Scroll to the first error
+                setTimeout(() => {
+                    const firstErrorField = Object.keys(validationErrors)[0];
+                    const firstErrorElement = document.querySelector(`[name="${firstErrorField}"]`);
+                    if (firstErrorElement) {
+                        firstErrorElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        firstErrorElement.focus();
+                    }
+                }, 100);
+                return;
+            }
             const bookingData = {
                 date: selectedDate,
                 timeSlot: selectedTimeSlot,
@@ -93,7 +107,7 @@ const Book = () => {
                     type: paymentType,
                     method: 'online',
                     date: new Date().toISOString(),
-                    transactionId: null // Will be set after payment
+                    transactionId: null
                 }]
             };
 
@@ -111,12 +125,22 @@ const Book = () => {
 
         } catch (error) {
             console.error('Booking error:', error);
-            alert(error.message || 'An error occurred. Please try again.');
+            setErrors({
+                general: error.message || 'An error occurred. Please try again.'
+            });
         } finally {
             setIsProcessing(false);
         }
     };
 
+    useEffect(() => {
+        // Scroll to just below the header when booking step changes
+        const headerHeight = document.querySelector('header')?.offsetHeight || 0;
+        window.scrollTo({
+            top: headerHeight,
+            behavior: 'smooth'
+        });
+    }, [bookingStep]);
     const processFullPayment = async (bookingId, amount) => {
         const orderDetails = {
             amount: amount * 100,
@@ -144,7 +168,9 @@ const Book = () => {
             },
             (error) => {
                 console.error('Payment failed:', error);
-                alert('Payment failed. Please try again.');
+                setErrors({
+                    payment: 'Payment failed. Please try again.'
+                });
             }
         );
     };
@@ -185,47 +211,6 @@ const Book = () => {
         );
     };
 
-
-    const proceedToRazorpayPayment = async (bookingId) => {
-        // Get fresh booking details from state
-        const currentBooking = bookingDetails || {
-            date: selectedDate,
-            timeSlot: selectedTimeSlot,
-            theaterId: selectedTheater,
-            userDetails: { name, email, phone },
-            totalPrice: finalPrice,
-            id: bookingId
-        };
-
-        const orderDetails = {
-            amount: currentBooking.totalPrice * 100, // Razorpay expects amount in paise
-            currency: 'INR',
-            customerName: currentBooking.userDetails.name,
-            customerEmail: currentBooking.userDetails.email,
-            customerPhone: currentBooking.userDetails.phone,
-            bookingId: currentBooking.id,
-        };
-
-        // Open Razorpay payment immediately
-        openRazorpayPayment(
-            orderDetails,
-            async (response) => {
-                console.log('Payment successful:', response);
-                try {
-                    await updateBookingStatus(currentBooking.id, 'confirmed');
-                    setBookingSuccess(true);
-                } catch (error) {
-                    console.error('Error updating booking status:', error);
-                    alert('Payment was successful but we encountered an issue updating your booking. Please contact support.');
-                }
-            },
-            (error) => {
-                console.error('Payment failed:', error);
-                alert('Payment failed. Please try again.');
-            }
-        );
-    };
-
     const handleUserDetailsSubmit = async (e) => {
         e.preventDefault();
 
@@ -252,7 +237,7 @@ const Book = () => {
         if (!email.trim()) {
             newErrors.email = 'Email is required';
         } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-            newErrors.email = 'Invalid email address';
+            newErrors.email = 'Please enter a valid email address';
         }
 
         // Phone validation
@@ -262,54 +247,39 @@ const Book = () => {
             newErrors.phone = 'Phone number must be 10 digits';
         }
 
+        // Theater and time slot validation
+        if (!selectedTheater) {
+            newErrors.booking = 'Please select a theater';
+        } else if (!selectedTimeSlot) {
+            newErrors.booking = 'Please select a time slot';
+        }
+
         setErrors(newErrors);
-        return Object.keys(newErrors).length === 0; // Return true if no errors
+
+        // Scroll to first error if any
+        if (Object.keys(newErrors).length > 0) {
+            setTimeout(() => {
+                const firstError = document.querySelector('[class*="border-red-400"]');
+                if (firstError) {
+                    firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    firstError.focus();
+                }
+            }, 100);
+        }
+
+        return Object.keys(newErrors).length === 0;
     };
-    // const handleUserDetailsSubmit = async (e) => {
-    //     e.preventDefault();
 
-    //     // Validate user details
-    //     const isValid = validateForm();
-    //     if (!isValid) return;
+    useEffect(() => {
+        const script = document.createElement('script');
+        script.src = "https://checkout.razorpay.com/v1/checkout.js";
+        script.async = true;
+        document.body.appendChild(script);
 
-    //     // Prepare the booking details
-    //     const bookingData = {
-    //         date: selectedDate,
-    //         timeSlot: selectedTimeSlot,
-    //         theaterId: selectedTheater,
-    //         userDetails: { name, email, phone },
-    //         decorations: selectedDecorations,
-    //         cake: selectedCake,
-    //         addOns: { rose: selectedRose, photography: selectedPhotography },
-    //         totalPrice: finalPrice,
-    //         bookedAt: new Date().toISOString(),
-    //         status: 'pending',
-    //     };
-
-    //     try {
-    //         // Check time slot availability
-    //         const isAvailable = await checkTimeSlotAvailability(bookingData.date, bookingData.timeSlot, bookingData.theaterId);
-    //         if (!isAvailable) {
-    //             alert('This time slot is already booked. Please choose another.');
-    //             return;
-    //         }
-
-    //         // Save booking
-    //         const bookingId = await saveBooking(bookingData);
-
-    //         // Reserve time slot
-    //         await reserveTimeSlot(bookingData.date, bookingData.timeSlot, bookingData.theaterId, bookingId);
-
-    //         // Store booking details in state
-    //         setBookingDetails({ ...bookingData, id: bookingId });
-
-    //         // Proceed to payment
-    //         handlePayment();
-    //     } catch (error) {
-    //         console.error('Error confirming booking:', error);
-    //         alert('An error occurred. Please try again.');
-    //     }
-    // };
+        return () => {
+            document.body.removeChild(script);
+        };
+    }, []);
 
     useEffect(() => {
         const fetchAllBookedTimeSlots = async () => {
@@ -333,95 +303,44 @@ const Book = () => {
             return () => clearInterval(interval);
         }
     }, [selectedDate]); // Add selectedDate as a dependency
-
-    // Render user details form
+    {
+        errors.booking && (
+            <motion.div
+                initial={{ opacity: 0, y: -20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="mb-4 p-3 bg-red-100 border border-red-300 text-red-700 rounded-lg flex items-center"
+            >
+                <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-5 w-5 mr-2"
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                >
+                    <path
+                        fillRule="evenodd"
+                        d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
+                        clipRule="evenodd"
+                    />
+                </svg>
+                {errors.booking}
+            </motion.div>
+        )
+    }
     const renderUserDetailsForm = () => (
-        <motion.div
-            key="userDetails"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            transition={{ duration: 0.4 }}
-            className="container mx-auto px-4 py-8"
-        >
-            <div className="max-w-2xl mx-auto bg-white rounded-xl p-6 shadow-xl">
-                <h2 className="text-2xl font-bold text-black mb-6">Enter Your Details</h2>
-                <form onSubmit={handleUserDetailsSubmit}>
-                    <div className="space-y-4">
-                        {/* Name Field */}
-                        <div className="flex flex-col">
-                            <label className="text-black mb-1">Full Name</label>
-                            <input
-                                type="text"
-                                value={name}
-                                onChange={(e) => setName(e.target.value)}
-                                className={`bg-white text-black border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 ${errors.name ? 'focus:ring-red-500' : 'focus:ring-yellow-400'
-                                    }`}
-                                placeholder="Enter your name"
-                            />
-                            {errors.name && (
-                                <p className="text-red-500 text-sm mt-1">{errors.name}</p>
-                            )}
-                        </div>
-
-                        {/* Email Field */}
-                        <div className="flex flex-col">
-                            <label className="text-black mb-1">Email</label>
-                            <input
-                                type="email"
-                                value={email}
-                                onChange={(e) => setEmail(e.target.value)}
-                                className={`bg-white text-black border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 ${errors.email ? 'focus:ring-red-500' : 'focus:ring-yellow-400'
-                                    }`}
-                                placeholder="Enter your email"
-                            />
-                            {errors.email && (
-                                <p className="text-red-500 text-sm mt-1">{errors.email}</p>
-                            )}
-                        </div>
-
-                        {/* Phone Field */}
-                        <div className="flex flex-col">
-                            <label className="text-black mb-1">Phone Number</label>
-                            <input
-                                type="tel"
-                                value={phone}
-                                onChange={(e) => setPhone(e.target.value)}
-                                className={`bg-white text-black border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 ${errors.phone ? 'focus:ring-red-500' : 'focus:ring-yellow-400'
-                                    }`}
-                                placeholder="Enter your phone number"
-                            />
-                            {errors.phone && (
-                                <p className="text-red-500 text-sm mt-1">{errors.phone}</p>
-                            )}
-                        </div>
-                    </div>
-                    <div className="flex justify-between mt-6">
-                        {/* Back Button to Booking Summary */}
-                        <motion.button
-                            whileHover={{ scale: 1.05 }}
-                            whileTap={{ scale: 0.95 }}
-                            onClick={() => setBookingStep('confirmation')} // Go back to Booking Summary
-                            className="px-6 py-3 border-2 border-yellow-400 text-black rounded-lg flex items-center hover:bg-yellow-400 transition-colors"
-                        >
-                            <ChevronLeft className="h-5 w-5 mr-2" />
-                            Back
-                        </motion.button>
-
-                        {/* Proceed to Payment Button */}
-                        <motion.button
-                            whileHover={{ scale: 1.05 }}
-                            whileTap={{ scale: 0.95 }}
-                            onClick={handlePayment} // Proceed to Payment
-                            className="px-6 py-3 bg-[#9f1d21] text-white rounded-lg font-bold flex items-center shadow-lg hover:bg-white hover:text-[#9f1d21] hover:border-[#9f1d21] hover:border-2 transition-colors"
-                        >
-                            Proceed to Payment
-                            <Check className="h-5 w-5 ml-2" />
-                        </motion.button>
-                    </div>
-                </form>
-            </div>
-        </motion.div>
+        <UserDetailsForm
+            name={name}
+            setName={setName}
+            email={email}
+            setEmail={setEmail}
+            phone={phone}
+            setPhone={setPhone}
+            errors={errors}
+            setErrors={setErrors}
+            isProcessing={isProcessing}
+            handlePayment={handlePayment}
+            handleBack={() => setBookingStep('confirmation')}
+            handleSubmit={handleUserDetailsSubmit}
+        />
     );
 
     // Calculate final price based on selections
