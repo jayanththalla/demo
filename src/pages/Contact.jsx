@@ -29,7 +29,7 @@ const Contact = () => {
             `Message: ${formData.message}`;
 
         // Open WhatsApp with the pre-filled message
-        window.open(`https://wa.me/919100111402?text=${whatsappMessage}`, '_blank');
+        window.open(`https://wa.me/919100111403?text=${whatsappMessage}`, '_blank');
 
         // Reset form after submission
         setFormData({ name: '', email: '', phone: '', message: '' });
@@ -77,7 +77,7 @@ const Contact = () => {
                     <p className="text-sm md:text-base text-white">
                         For reservations and special events, please call during business hours or fill out the contact form below.
                     </p>
-                    <p className="text-base md:text-lg font-bold mt-2 text-yellow-400">Contact: +91  9100111402</p>
+                    <p className="text-base md:text-lg font-bold mt-2 text-yellow-400">Contact: +91  9100111403</p>
 
                     {/* Popcorn Animation */}
                     <motion.div
@@ -183,8 +183,8 @@ const Contact = () => {
                         <ul className="space-y-4">
                             <motion.li className="flex items-center" whileHover={{ x: 5 }}>
                                 <Phone className="mr-3 text-[#9f1d21]" size={20} />
-                                <a href="tel:+919100111402" className="text-inherit hover:underline">
-                                    +919100111402
+                                <a href="tel:+919100111403" className="text-inherit hover:underline">
+                                    +919100111403
                                 </a>
                             </motion.li>
 
@@ -247,7 +247,7 @@ const Contact = () => {
                                 </svg>
                             </motion.a>
                             <motion.a
-                                href="https://wa.me/919100111402"
+                                href="https://wa.me/919100111403"
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="bg-[#9f1d21] text-white p-2 rounded-full transition-all"

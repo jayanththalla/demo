@@ -33,7 +33,7 @@ export const theaters = [
         extraPersonRate: 200,
         decorationIncluded: true,
         decorationPrice: 0,
-        image: "/assets/light.jpg",
+        image: "/assets/starlight.jpg",
         features: ['Alexa Control', 'Dolby Theatre']
     }
 ];
