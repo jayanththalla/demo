@@ -65,30 +65,50 @@ const AdminDashboard = () => {
         const fetchBookings = async () => {
             try {
                 const allBookings = await getAllBookings();
+                console.log('Raw bookings from DB:', allBookings); // Debug log
+
                 if (allBookings) {
                     // In your AdminDashboard component, ensure proper data transformation:
                     const bookingsArray = Object.keys(allBookings).map((key) => {
                         const booking = allBookings[key];
 
-                        // Handle both formats of timeSlot (raw "1-2" or formatted "5:00 PM - 8:00 PM")
-                        let timeSlotDisplay = booking.timeSlot;
-                        if (timeSlotMap[booking.timeSlot]) {
-                            timeSlotDisplay = timeSlotMap[booking.timeSlot];
-                        } else if (booking.formattedTimeSlot) {
-                            timeSlotDisplay = booking.formattedTimeSlot;
+                        // Handle missing timeSlot with a default value
+                        const timeSlot = booking.timeSlot || '0-0'; // Default to first time slot if missing
+
+                        // Handle time slot format
+                        let timeSlotDisplay = timeSlot;
+                        if (timeSlot.includes('-')) {
+                            const [theaterId, slotIndex] = timeSlot.split('-');
+                            timeSlotDisplay = timeSlotIndexMap[slotIndex] || timeSlot;
+                        } else if (timeSlotMap[timeSlot]) {
+                            timeSlotDisplay = timeSlotMap[timeSlot];
                         }
 
+                        // Handle missing userDetails
+                        const userDetails = booking.userDetails || {
+                            name: 'Unknown Customer',
+                            email: '',
+                            phone: ''
+                        };
+
                         // Calculate balance due
-                        const balanceDue = Math.max((booking.totalPrice || 0) - (booking.amountPaid || 0), 0);
+                        const totalPrice = booking.totalPrice || 0;
+                        const amountPaid = booking.amountPaid || 0;
+                        const balanceDue = Math.max(totalPrice - amountPaid, 0);
 
                         return {
                             id: key,
                             ...booking,
-                            theaterName: booking.theaterName || theaterMap[booking.theaterId] || `Theater ${booking.theaterId}`,
+                            userDetails, // Ensure userDetails exists
+                            theaterName: theaterMap[booking.theaterId] || `Theater ${booking.theaterId}`,
                             formattedTimeSlot: timeSlotDisplay,
-                            balanceDue: balanceDue
+                            balanceDue,
+                            totalPrice,
+                            amountPaid
                         };
                     });
+                    console.log('Transformed bookings:', bookingsArray); // Debug log
+
                     setBookings(bookingsArray);
                     setFilteredBookings(bookingsArray);
                 }
@@ -124,10 +144,24 @@ const AdminDashboard = () => {
         }
 
         // Filter by selected date
-        const selectedDateStr = selectedDate.toLocaleDateString('en-US');
-        filtered = filtered.filter(booking =>
-            new Date(booking.date).toLocaleDateString('en-US') === selectedDateStr
-        );
+        const parseBookingDate = (dateStr) => {
+            if (!dateStr) return new Date();
+
+            // Handle "d/M/yyyy" format
+            if (dateStr.includes('/')) {
+                const [day, month, year] = dateStr.split('/');
+                return new Date(`${year}-${month}-${day}`);
+            }
+
+            // Handle ISO format or others
+            return new Date(dateStr);
+        };
+
+        // Then in your filter:
+        filtered = filtered.filter(booking => {
+            const bookingDate = parseBookingDate(booking.date);
+            return bookingDate.toDateString() === selectedDate.toDateString();
+        });
 
         setFilteredBookings(filtered);
     }, [searchQuery, statusFilter, bookings, selectedDate]);
