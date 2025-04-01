@@ -28,7 +28,7 @@ const DecorationSelector = ({ onSelect, onBack, onNext, selectedDecorations }) =
     }, [selectedDecorationsLocal, onSelect, filteredDecorations]);
 
     return (
-        <div className="py-6 bg-white text-black">
+        <div className="py-6 bg-gray-50 text-black">
             {/* Header and Price Display */}
             <div className="flex items-center justify-between mb-6">
                 <div className="flex items-center">

@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { ChevronLeft, Check } from 'lucide-react';
 import ErrorDisplay from './ErrorDisplay';
@@ -17,6 +18,17 @@ const UserDetailsForm = ({
     handleBack,
     handleSubmit
 }) => {
+    const [acceptedTerms, setAcceptedTerms] = useState(false);
+    const [showTerms, setShowTerms] = useState(false);
+
+    const terms = [
+        "1. Booking is confirmed only after successful payment.",
+        "2. Cancellations must be made 24 hours before the scheduled time.",
+        "3. Outside food and beverages are not allowed.",
+        "4. Maximum occupancy must be strictly followed.",
+        "5. The venue must be vacated at the scheduled end time."
+    ];
+
     return (
         <>
             <ProcessingPopup isVisible={isProcessing} />
@@ -164,6 +176,42 @@ const UserDetailsForm = ({
                                     </div>
                                 )}
                             </div>
+
+                            {/* Terms & Conditions */}
+                            <div className="space-y-4">
+                                <button
+                                    type="button"
+                                    onClick={() => setShowTerms(!showTerms)}
+                                    className="text-[#9f1d21] underline text-sm"
+                                >
+                                    View Terms & Conditions
+                                </button>
+
+                                {showTerms && (
+                                    <motion.div
+                                        initial={{ opacity: 0, height: 0 }}
+                                        animate={{ opacity: 1, height: 'auto' }}
+                                        className="bg-gray-50 p-4 rounded-lg text-sm"
+                                    >
+                                        {terms.map((term, index) => (
+                                            <p key={index} className="mb-2">{term}</p>
+                                        ))}
+                                    </motion.div>
+                                )}
+
+                                <div className="flex items-center">
+                                    <input
+                                        type="checkbox"
+                                        id="terms"
+                                        checked={acceptedTerms}
+                                        onChange={(e) => setAcceptedTerms(e.target.checked)}
+                                        className="h-4 w-4 text-[#9f1d21] rounded border-gray-300"
+                                    />
+                                    <label htmlFor="terms" className="ml-2 text-sm text-gray-700">
+                                        I agree to the terms and conditions
+                                    </label>
+                                </div>
+                            </div>
                         </div>
 
                         <div className="flex justify-between mt-6">
@@ -182,8 +230,8 @@ const UserDetailsForm = ({
                                 type="submit"
                                 whileHover={{ scale: 1.05 }}
                                 whileTap={{ scale: 0.95 }}
-                                disabled={isProcessing}
-                                className={`px-6 py-3 bg-[#9f1d21] text-white rounded-lg font-bold flex items-center justify-center shadow-lg hover:bg-white hover:text-[#9f1d21] hover:border-[#9f1d21] hover:border-2 transition-colors ${isProcessing ? 'opacity-70 cursor-not-allowed' : ''}`}
+                                disabled={!acceptedTerms || isProcessing}
+                                className={`px-6 py-3 bg-[#9f1d21] text-white rounded-lg font-bold flex items-center justify-center shadow-lg hover:bg-white hover:text-[#9f1d21] hover:border-[#9f1d21] hover:border-2 transition-colors ${!acceptedTerms || isProcessing ? 'opacity-70 cursor-not-allowed' : ''}`}
                             >
                                 <span className="flex items-center">
                                     {isProcessing ? (
@@ -197,6 +245,11 @@ const UserDetailsForm = ({
                                 </span>
                             </motion.button>
                         </div>
+
+                        {/* General Error Message */}
+                        {errors.general && (
+                            <p className="text-red-500 text-sm text-center mt-4">{errors.general}</p>
+                        )}
                     </form>
                 </div>
             </motion.div>

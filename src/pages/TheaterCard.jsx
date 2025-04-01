@@ -1,8 +1,10 @@
 import { motion } from 'framer-motion';
 import { Users, Clock, Sparkles, Star, Award, ThumbsUp, Calendar } from 'lucide-react';
 import PropTypes from 'prop-types';
+import { useState, useEffect } from 'react';
 
 const TheaterCard = ({ ...props }) => {
+    const [currentImageIndex, setCurrentImageIndex] = useState(0);
     const {
         theater,
         selectedTimeSlot,
@@ -13,7 +15,71 @@ const TheaterCard = ({ ...props }) => {
     } = props;
 
     const theaterBookedSlots = bookedTimeSlots[theater.id] || [];
-    console.log('Booked slots for theater', theater.id, ':', theaterBookedSlots); // Debugging
+
+    // Auto-scroll images
+    useEffect(() => {
+        if (!theater.images || theater.images.length <= 1) return;
+
+        const interval = setInterval(() => {
+            setCurrentImageIndex((prevIndex) =>
+                prevIndex === theater.images.length - 1 ? 0 : prevIndex + 1
+            );
+        }, 3000); // Change image every 3 seconds
+
+        return () => clearInterval(interval);
+    }, [theater.images]);
+
+    // Replace the existing image section with this new carousel
+    const renderImageCarousel = () => (
+        <div className="relative h-48 overflow-hidden rounded-lg">
+            <div
+                className="flex transition-transform duration-500 ease-in-out h-full"
+                style={{
+                    transform: `translateX(-${currentImageIndex * 100}%)`,
+                    width: `${theater.images?.length * 100}%`
+                }}
+            >
+                {theater.images?.map((image, index) => (
+                    <div
+                        key={index}
+                        className="relative w-full h-full flex-shrink-0"
+                    >
+                        <img
+                            src={image}
+                            alt={`${theater.name} view ${index + 1}`}
+                            className="w-full h-full object-cover"
+                        />
+                    </div>
+                ))}
+            </div>
+
+            {/* Image indicators */}
+            <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2 flex space-x-2">
+                {theater.images?.map((_, index) => (
+                    <button
+                        key={index}
+                        onClick={() => setCurrentImageIndex(index)}
+                        className={`w-2 h-2 rounded-full transition-all ${currentImageIndex === index
+                                ? 'bg-yellow-400 w-4'
+                                : 'bg-white/50 hover:bg-white/75'
+                            }`}
+                        aria-label={`View image ${index + 1}`}
+                    />
+                ))}
+            </div>
+
+            {/* Existing badges */}
+            <div className="absolute top-3 left-3 bg-yellow-400 text-black text-xs font-bold px-3 py-1.5 rounded-lg flex items-center">
+                <Users size={14} className="mr-2" /> {theater.maxPeople} SEATS
+            </div>
+            {theater.specialFeature && (
+                <div className="absolute bottom-0 left-0 right-0 bg-white/70 text-black text-sm font-bold py-1 text-center">
+                    <Sparkles size={16} className="inline mr-1 text-yellow-400" />
+                    {theater.specialFeature}
+                </div>
+            )}
+        </div>
+    );
 
     return (
         <motion.div
@@ -21,29 +87,10 @@ const TheaterCard = ({ ...props }) => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: theater.id * 0.1 }}
             whileHover={{ y: -10, transition: { duration: 0.2 } }}
-            className="bg-white border-2 border-yellow-400 rounded-lg overflow-hidden shadow-lg shadow-yellow-400/10 h-full flex flex-col"
+            className="bg-white border-2 border-yellow-400 rounded-xl overflow-hidden shadow-lg shadow-yellow-400/10 h-full flex flex-col p-4"
         >
-            {/* Theater Card Content */}
-            <div className="relative h-48 overflow-hidden">
-                <img
-                    src={theater.image}
-                    alt={theater.name}
-                    className="w-full h-full object-cover transition-transform duration-500 hover:scale-110"
-                />
-                <div className="absolute top-2 left-2 bg-yellow-400 text-black text-xs font-bold px-2 py-1 rounded flex items-center">
-                    <Users size={14} className="mr-1" /> {theater.maxPeople} SEATS
-                </div>
-                {/* <div className="absolute top-2 right-2 bg-white/80 border border-yellow-400 text-black text-xs font-bold px-2 py-1 rounded flex items-center">
-                    <Clock size={14} className="mr-1" /> 3 HRS
-                </div> */}
-                {theater.specialFeature && (
-                    <div className="absolute bottom-0 left-0 right-0 bg-white/70 text-black text-sm font-bold py-1 text-center">
-                        <Sparkles size={16} className="inline mr-1 text-yellow-400" /> {theater.specialFeature}
-                    </div>
-                )}
-            </div>
-
-            <div className="p-4 bg-white text-black flex-grow flex flex-col">
+            {renderImageCarousel()}
+            <div className="pt-4 bg-white text-black flex-grow flex flex-col">
                 <div className="flex justify-between items-center mb-2">
                     <p className="text-black font-bold flex items-center">
                         ₹{theater.basePrice}/-
@@ -63,7 +110,7 @@ const TheaterCard = ({ ...props }) => {
                 <ul className="text-sm mb-4 space-y-1">
                     <li className="flex items-start">
                         <Users size={14} className="mr-2 mt-1 text-yellow-400 flex-shrink-0" />
-                        <span>For {theater.minPeople} to {theater.maxPeople} people</span>
+                        <span>Max {theater.maxPeople} people</span>
                     </li>
                     {theater.extraPersonRate > 0 && (
                         <li className="flex items-start">
@@ -123,7 +170,7 @@ const TheaterCard = ({ ...props }) => {
                         whileHover={{ scale: 1.03 }}
                         whileTap={{ scale: 0.97 }}
                         onClick={() => handleBookNow(theater.id)}
-                        className="w-full bg-[#9f1d21] text-white py-2 font-bold rounded hover:bg-[#b82329] transition-colors flex items-center justify-center"
+                        className="w-full bg-[#9f1d21] text-white py-2 font-bold rounded-lg hover:bg-[#b82329] transition-colors flex items-center justify-center mb-2"
                     >
                         <Calendar className="mr-2" size={18} />
                         Book now
@@ -137,7 +184,7 @@ const TheaterCard = ({ ...props }) => {
 TheaterCard.propTypes = {
     theater: PropTypes.shape({
         id: PropTypes.number.isRequired,
-        image: PropTypes.string.isRequired,
+        image: PropTypes.string,
         name: PropTypes.string.isRequired,
         maxPeople: PropTypes.number.isRequired,
         minPeople: PropTypes.number.isRequired,
@@ -146,7 +193,8 @@ TheaterCard.propTypes = {
         decorationIncluded: PropTypes.bool.isRequired,
         decorationPrice: PropTypes.number,
         specialFeature: PropTypes.string,
-        features: PropTypes.arrayOf(PropTypes.string).isRequired
+        features: PropTypes.arrayOf(PropTypes.string).isRequired,
+        images: PropTypes.arrayOf(PropTypes.string).isRequired
     }).isRequired,
     selectedTimeSlot: PropTypes.string,
     setSelectedTimeSlot: PropTypes.func.isRequired,

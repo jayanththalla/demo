@@ -47,9 +47,13 @@ export const checkTimeSlotAvailability = async (date, timeSlot, theaterId) => {
 
 // Reserve a time slot
 export const reserveTimeSlot = async (date, timeSlot, theaterId, bookingId) => {
-    await set(ref(db, `timeSlots/${date}/${timeSlot}/${theaterId}`), { bookingId, status: 'booked' });
+    await set(ref(db, `timeSlots/${date}/${timeSlot}/${theaterId}`), {
+        bookingId, status: 'booked', bookedAt: new Date().toISOString()
+    });
 };
-
+export const releaseTimeSlot = async (date, timeSlot, theaterId) => {
+    await remove(ref(db, `timeSlots/${date}/${timeSlot}/${theaterId}`));
+};
 // Get all bookings (for admin dashboard)
 // In bookingService.js
 export const getAllBookings = async () => {
@@ -96,14 +100,27 @@ export const getAllBookings = async () => {
 
 // Fetch all booked slots for a specific theater and date
 export const fetchBookedSlots = async (date, theaterId) => {
-    const snapshot = await get(ref(db, `timeSlots/${date}`));
+    // First get all time slot reservations
+    const timeSlotsSnapshot = await get(ref(db, `timeSlots/${date}`));
+    const bookingsSnapshot = await get(ref(db, 'bookings'));
+
     const bookedSlots = [];
 
-    if (snapshot.exists()) {
-        const slots = snapshot.val();
+    if (timeSlotsSnapshot.exists()) {
+        const slots = timeSlotsSnapshot.val();
+        const bookings = bookingsSnapshot.exists() ? bookingsSnapshot.val() : {};
+
         for (const timeSlot in slots) {
             if (slots[timeSlot][theaterId]) {
-                bookedSlots.push(timeSlot);
+                const bookingId = slots[timeSlot][theaterId].bookingId;
+                const booking = bookings[bookingId];
+
+                // Only consider it booked if payment meets requirements
+                if (booking &&
+                    (booking.paymentStatus === 'paid' ||
+                        (booking.paymentStatus === 'partial' && booking.amountPaid >= booking.totalPrice * 0.5))) {
+                    bookedSlots.push(timeSlot);
+                }
             }
         }
     }
@@ -212,3 +229,36 @@ export const recordOfflinePayment = async (bookingId, amount, receivedBy) => {
     await update(bookingRef, updates);
     return updates;
 };
+
+// Add this to your bookingService.js
+export const cleanupExpiredBookings = async () => {
+    const bookingsRef = ref(db, 'bookings');
+    const timeSlotsRef = ref(db, 'timeSlots');
+    const [bookingsSnapshot, timeSlotsSnapshot] = await Promise.all([get(bookingsRef), get(timeSlotsRef)]);
+
+    if (!bookingsSnapshot.exists()) return;
+
+    const now = new Date();
+    const oneHourAgo = new Date(now.getTime() - 60 * 60 * 1000).toISOString();
+
+    const updates = {};
+    const timeSlotUpdates = {};
+
+    Object.entries(bookingsSnapshot.val()).forEach(([id, booking]) => {
+        if (booking.status === 'pending' && booking.createdAt < oneHourAgo) {
+            // Mark booking as expired
+            updates[`bookings/${id}/status`] = 'expired';
+
+            // Release time slot if it was reserved
+            if (booking.date && booking.timeSlot && booking.theaterId) {
+                timeSlotUpdates[`timeSlots/${booking.date}/${booking.timeSlot}/${booking.theaterId}`] = null;
+            }
+        }
+    });
+
+    // Execute all updates in a single transaction
+    if (Object.keys(updates).length > 0 || Object.keys(timeSlotUpdates).length > 0) {
+        await update(ref(db), { ...updates, ...timeSlotUpdates });
+    }
+};
+

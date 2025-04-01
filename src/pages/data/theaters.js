@@ -9,7 +9,11 @@ export const theaters = [
         extraPersonRate: 200,
         decorationIncluded: true,
         decorationPrice: 0,
-        image: "/assets/eleganto.jpg",
+        images: ["/assets/eleganto.jpg",
+            "/assets/premium.jpg",
+            "/assets/starlight.jpg",
+            // "/assets/luminous.jpg",
+        ],
         features: ['Stylish interior', 'Premium sound', 'Mood lighting']
     },
     {
@@ -21,7 +25,11 @@ export const theaters = [
         extraPersonRate: 200,
         decorationIncluded: true,
         decorationPrice: 0,
-        image: "/assets/premium.jpg",
+        images: ["/assets/premium.jpg",
+            "/assets/eleganto.jpg",
+            "/assets/starlight.jpg",
+            // "/assets/luminous.jpg",
+        ],
         features: ['Alexa Control', '3 Hours Dolby Theatre']
     },
     {
@@ -33,7 +41,11 @@ export const theaters = [
         extraPersonRate: 200,
         decorationIncluded: true,
         decorationPrice: 0,
-        image: "/assets/starlight.jpg",
+        images: ["/assets/starlight.jpg",
+            "/assets/premium.jpg",
+            "/assets/eleganto.jpg",
+            // "/assets/luminous.jpg",
+        ],
         features: ['Alexa Control', 'Dolby Theatre']
     }
 ];

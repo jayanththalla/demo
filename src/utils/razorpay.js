@@ -76,7 +76,7 @@ export const openRazorpayPayment = async (orderDetails, onSuccess, onFailure, on
             amount: order.amount,
             currency: order.currency,
             order_id: order.id,
-            name: 'Binge-n-Bash',
+            name: 'BingeHall',
             description: 'Booking Payment',
             image: '/assets/logo.png',
             prefill: {

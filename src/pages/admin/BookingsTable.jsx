@@ -14,8 +14,28 @@ const BookingsTable = ({ bookings, onRowClick }) => {
                 return { bg: 'bg-yellow-100', text: 'text-yellow-800', icon: '⏱' };
         }
     };
+    // Replace the existing sorting code with this safer version
     const sortedBookings = [...bookings].sort((a, b) => {
-        return new Date(b.createdAt) - new Date(a.createdAt);
+        // Sort by date first
+        const dateA = new Date(a.date || 0);
+        const dateB = new Date(b.date || 0);
+        if (dateA > dateB) return -1;
+        if (dateA < dateB) return 1;
+
+        // If same date, sort by time slot if available
+        if (a.timeSlot && b.timeSlot) {
+            try {
+                const timeA = parseInt(a.timeSlot.split('-')[1]) || 0;
+                const timeB = parseInt(b.timeSlot.split('-')[1]) || 0;
+                return timeA - timeB;
+            } catch (error) {
+                console.warn('Error sorting time slots:', error);
+                return 0;
+            }
+        }
+
+        // If no time slots, maintain original order
+        return 0;
     });
 
     return (
@@ -31,8 +51,10 @@ const BookingsTable = ({ bookings, onRowClick }) => {
                         <tr>
                             <TableHeader>Name</TableHeader>
                             <TableHeader>Email</TableHeader>
+                            <TableHeader>Phone</TableHeader>
                             <TableHeader>Date</TableHeader>
-                            <TableHeader>Time Slot</TableHeader>
+                            <TableHeader>Theater</TableHeader>
+                            <TableHeader>Time</TableHeader>
                             <TableHeader>Status</TableHeader>
                             <TableHeader>Payment</TableHeader>
                             <TableHeader>Actions</TableHeader>
@@ -81,8 +103,15 @@ const TableRow = ({ booking, index, onClick, statusStyles }) => (
         </td>
         <td className="px-6 py-4 whitespace-nowrap text-gray-600">{booking.userDetails.email}</td>
         <td className="px-6 py-4 whitespace-nowrap text-gray-600">{booking.userDetails.phone}</td>
-        <td className="px-6 py-4 whitespace-nowrap text-gray-600">{booking.date}</td>
-        <td className="px-6 py-4 whitespace-nowrap text-gray-600">{booking.timeSlot}</td>
+        <td className="px-6 py-4 whitespace-nowrap text-gray-600">
+            {new Date(booking.date).toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric'
+            })}
+        </td>
+        <td className="px-6 py-4 whitespace-nowrap text-gray-600">{booking.theaterName}</td>
+        <td className="px-6 py-4 whitespace-nowrap text-gray-600">{booking.formattedTimeSlot || booking.timeSlot}</td>
         <td className="px-6 py-4 whitespace-nowrap">
             <span className={`px-3 py-1 inline-flex items-center rounded-full text-xs font-medium ${statusStyles.bg} ${statusStyles.text}`}>
                 {statusStyles.icon} {booking.status}

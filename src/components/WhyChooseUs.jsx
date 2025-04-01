@@ -38,17 +38,17 @@ const WhyChooseUs = () => {
     ];
 
     return (
-        <div className="relative py-24 overflow-hidden ">
+        <div className="relative py-24 overflow-hidden bg-gradient-to-b from-yellow-100 to-red-100">
             {/* Background with reliable placeholder - removed opacity and changed z-index */}
-            <div className="absolute inset-0 z-0 overflow-hidden">
+            <div className="absolute inset-0 z-0 overflow-hidden opacity-10">
                 <div className="absolute -top-10 right-0 w-full h-full bg-pattern">
                     <img src="/assets/2.png" alt="Filmstrip Background" className="w-full h-full object-cover" />
                 </div>
             </div>
 
             {/* Decorative elements */}
-            <div className="absolute top-0 left-0 w-32 h-32 bg-yellow-500 opacity-10 rounded-full -translate-x-16 -translate-y-16 z-1"></div>
-            <div className="absolute bottom-0 right-0 w-64 h-64 bg-yellow-500 opacity-10 rounded-full translate-x-24 translate-y-24 z-1"></div>
+            <div className="absolute top-0 left-0 w-32 h-32 bg-yellow-500 opacity-20 rounded-full -translate-x-16 -translate-y-16 z-1"></div>
+            <div className="absolute bottom-0 right-0 w-64 h-64 bg-yellow-500 opacity-20 rounded-full translate-x-24 translate-y-24 z-1"></div>
 
             <div className="container mx-auto px-4 relative z-10">
                 <motion.div
@@ -76,7 +76,7 @@ const WhyChooseUs = () => {
                                 scale: 1.03,
                                 boxShadow: "0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)"
                             }}
-                            className="bg-white rounded-xl p-8 shadow-lg border border-gray-100 flex"
+                            className="bg-white rounded-xl p-8 shadow-lg border-l-4 border-yellow-500 flex"
                         >
                             <div className="bg-yellow-500 text-black font-bold text-2xl w-16 h-16 flex items-center justify-center rounded-lg mr-5 shrink-0">
                                 {feature.number}
@@ -143,7 +143,7 @@ const WhyChooseUs = () => {
                     <div className="flex space-x-12 min-w-max">
                         {categories.map((category) => (
                             <div key={category.id} className="flex flex-col items-center w-40">
-                                <div className="w-full h-40 rounded-lg overflow-hidden shadow-md mb-2">
+                                <div className="w-full h-40 rounded-lg overflow-hidden shadow-md mb-2 border-2 border-yellow-300 hover:border-[#9f1d21] transition-colors duration-300">
                                     <img
                                         src={category.image}
                                         alt={category.name}

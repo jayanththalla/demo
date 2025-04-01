@@ -71,7 +71,7 @@ const AddOnsSelector = ({ onSelect, onBack, onNext, selectedDecorations, selecte
         });
     }, [selectedDecorations, selectedRose, selectedPhotography, onSelect, decorations, roses, photography]);
     return (
-        <div className="py-6 bg-white text-black">
+        <div className="py-6 bg-gray-50 text-black">
             <div className="flex items-center justify-between mb-6">
                 <div className="flex items-center">
                     <div className="w-8 h-1 bg-yellow-400 mr-3"></div>

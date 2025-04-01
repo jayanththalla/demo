@@ -40,7 +40,7 @@ const RefundPolicy = () => {
                         <div className="bg-gray-50 p-6 rounded-lg border-l-4 border-[#9f1d21]">
                             <h3 className="text-xl font-semibold text-gray-900 mb-3">2. Non-Refundable Nature</h3>
                             <ul className="list-disc pl-6 space-y-2">
-                                <li>The ₹700 advance is <strong>strictly non-refundable</strong> under any circumstances</li>
+                                <li>The ₹500 advance is <strong>strictly non-refundable</strong> under any circumstances</li>
                                 <li>Covers administrative and preparation costs</li>
                             </ul>
                         </div>

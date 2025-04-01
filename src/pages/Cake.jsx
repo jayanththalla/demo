@@ -4,29 +4,23 @@ import PropTypes from 'prop-types';
 import { cakeOptions } from './data/constants';
 
 const CakeSelector = ({ onSelect, onBack, onNext, selectedCake, isEggless }) => {
-    // Filter out the 'none' option from cakeOptions
-    const filteredCakes = cakeOptions.filter(cake => cake.id !== 'none');
-
     const [selectedCakeLocal, setSelectedCakeLocal] = useState(selectedCake);
     const [isEgglessLocal, setIsEgglessLocal] = useState(isEggless);
+    const [cakeName, setCakeName] = useState('');
 
-    // Sync local state with props
+    // Update parent when any value changes
     useEffect(() => {
-        setSelectedCakeLocal(selectedCake);
-    }, [selectedCake]);
+        const selectedCakeOption = cakeOptions.find(c => c.id === selectedCakeLocal);
+        onSelect(selectedCakeLocal, selectedCakeOption?.price || 0, isEgglessLocal, cakeName);
+    }, [selectedCakeLocal, isEgglessLocal, cakeName, onSelect]);
 
-    useEffect(() => {
-        setIsEgglessLocal(isEggless);
-    }, [isEggless]);
-
-    // Notify parent of changes
-    useEffect(() => {
-        const cakeOption = filteredCakes.find(c => c.id === selectedCakeLocal);
-        const totalPrice = cakeOption?.price || 0;
-
-        // Pass the actual cake ID instead of a boolean
-        onSelect(selectedCakeLocal, totalPrice, isEgglessLocal);
-    }, [selectedCakeLocal, isEgglessLocal, onSelect, filteredCakes]);
+    // Add validation for cake message
+    const handleCakeNameChange = (e) => {
+        const value = e.target.value;
+        if (value.length <= 25) { // Limit to 25 characters
+            setCakeName(value);
+        }
+    };
 
     // Toggle cake selection
     const toggleCake = (id) => {
@@ -38,7 +32,7 @@ const CakeSelector = ({ onSelect, onBack, onNext, selectedCake, isEggless }) => 
     };
 
     return (
-        <div className="py-6 bg-white text-black">
+        <div className="py-6 bg-gray-50 text-black">
             {/* Header and Price Display */}
             <div className="flex items-center justify-between mb-6">
                 <div className="flex items-center">
@@ -47,7 +41,7 @@ const CakeSelector = ({ onSelect, onBack, onNext, selectedCake, isEggless }) => 
                 </div>
                 <div className="text-right">
                     <div className="bg-white text-black border-2 border-yellow-400 px-4 py-2 rounded font-bold">
-                        Price: ₹{filteredCakes.find(c => c.id === selectedCakeLocal)?.price || 0}
+                        Price: ₹{cakeOptions.find(c => c.id === selectedCakeLocal)?.price || 0}
                     </div>
                 </div>
             </div>
@@ -68,7 +62,7 @@ const CakeSelector = ({ onSelect, onBack, onNext, selectedCake, isEggless }) => 
 
             {/* Cake Options */}
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-                {filteredCakes.map((cake) => (
+                {cakeOptions.filter(cake => cake.id !== 'none').map((cake) => (
                     <div
                         key={cake.id}
                         onClick={() => toggleCake(cake.id)}
@@ -91,6 +85,40 @@ const CakeSelector = ({ onSelect, onBack, onNext, selectedCake, isEggless }) => 
                     </div>
                 ))}
             </div>
+
+            {/* Cake Name Input Section */}
+            {selectedCakeLocal && (
+                <div className="mt-8 bg-white p-6 rounded-lg border-2 border-gray-200">
+                    <div className="flex items-center mb-4">
+                        <div className="w-6 h-1 bg-yellow-400 mr-3"></div>
+                        <h3 className="text-xl font-bold">Cake Message</h3>
+                    </div>
+
+                    <div className="space-y-2">
+                        <label htmlFor="cakeName" className="block text-sm font-medium text-gray-700">
+                            What message would you like on the cake?
+                        </label>
+                        <input
+                            type="text"
+                            id="cakeName"
+                            value={cakeName}
+                            onChange={handleCakeNameChange}
+                            className="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-yellow-400 transition-colors"
+                            placeholder="e.g., Happy Birthday John!"
+                        />
+                        <div className="flex justify-between items-center text-sm">
+                            <p className="text-gray-500">
+                                {25 - cakeName.length} characters remaining
+                            </p>
+                            {cakeName && (
+                                <p className="text-yellow-600 font-medium">
+                                    Preview: &quot;{cakeName}&quot;
+                                </p>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            )}
 
             {/* Buttons */}
             <div className="mt-6 flex justify-between">
@@ -120,7 +148,8 @@ CakeSelector.propTypes = {
     onBack: PropTypes.func.isRequired,
     onNext: PropTypes.func.isRequired,
     selectedCake: PropTypes.string,
-    isEggless: PropTypes.bool
+    isEggless: PropTypes.bool,
+    cakeName: PropTypes.string // Add this line
 };
 
 export default CakeSelector;

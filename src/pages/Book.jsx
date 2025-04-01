@@ -4,13 +4,12 @@ import BookHeader from './BookHeader';
 import Tabs from './Tabs';
 import TheaterCard from './TheaterCard';
 import { theaters } from './data/theaters'; // Import theaters data
-import { timeSlots, notes, decorations, roses, photography, decorationOptions, cakeOptions } from './data/constants'; // Import constants
-import NotesSection from './Notes';
+import { timeSlots, decorations, roses, photography, decorationOptions, cakeOptions } from './data/constants'; // Import constants
 import DecorationSelector from './Decoration';
 import CakeSelector from './Cake'; // Import the new CakeSelector component
 import AddOnsSelector from './Adds'; // Import the AddOnsSelector component
 import PartyHallDetails from './PartyHallDetails';
-import { saveBooking, reserveTimeSlot, fetchBookedSlots, updateBookingPayment } from '../services/bookingService';
+import { saveBooking, reserveTimeSlot, fetchBookedSlots, updateBookingPayment, cleanupExpiredBookings } from '../services/bookingService';
 import BookingHeader from './BookingHeader';
 import BookingConfirmation from './BookingConfirmation';
 import { openRazorpayPayment } from '../utils/razorpay';
@@ -42,7 +41,17 @@ const Book = () => {
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
     const [phone, setPhone] = useState('');
+    const [cakeName, setCakeName] = useState('');
     const [isProcessing, setIsProcessing] = useState(false);
+
+    // In your Book component
+    useEffect(() => {
+        const cleanupInterval = setInterval(() => {
+            cleanupExpiredBookings();
+        }, 30 * 60 * 1000); // Run every 30 minutes
+
+        return () => clearInterval(cleanupInterval);
+    }, []);
     const handlePayment = async () => {
         const amountToPay = paymentType === 'full' ? finalPrice : paymentAmount;
         if (isProcessing) return;
@@ -97,11 +106,15 @@ const Book = () => {
                 theaterId: selectedTheater,
                 userDetails: { name, email, phone },
                 decorations: selectedDecorations,
-                cake: selectedCake,
+                cake: {
+                    id: selectedCake,
+                    name: cakeName,
+                },
                 addOns: { rose: selectedRose, photography: selectedPhotography },
                 totalPrice: finalPrice,
                 paymentStatus: paymentType === 'full' ? 'paid' : 'partial',
                 amountPaid: amountToPay,
+                status: 'pending', // Initial status
                 paymentHistory: [{
                     amount: amountToPay,
                     type: paymentType,
@@ -160,6 +173,7 @@ const Book = () => {
                     amount,
                     response.razorpay_payment_id
                 );
+                await reserveTimeSlot(selectedDate, selectedTimeSlot, selectedTheater, bookingId);
                 setBookingDetails(prev => ({
                     ...prev,
                     ...updates
@@ -198,6 +212,9 @@ const Book = () => {
                     amount,
                     response.razorpay_payment_id
                 );
+                if (amount >= finalPrice * 0.5) { // Example: require at least 50% for reservation
+                    await reserveTimeSlot(selectedDate, selectedTimeSlot, selectedTheater, bookingId);
+                }
                 setBookingDetails(prev => ({
                     ...prev,
                     ...updates
@@ -403,10 +420,11 @@ const Book = () => {
         setSelectedDecorations(decorations.length > 0 ? [decorations[0]] : []); // Allow only one decoration
     };
 
-    const handleCakeSelect = (cakeId, price, eggless) => {
+    const handleCakeSelect = (cakeId, price, eggless, message) => {
         setselectedCake(cakeId); // Store the cake ID
         setIsEggless(eggless);
         setCakePrice(price);
+        setCakeName(message);
     };
 
     const handleAddOnsSelect = (selections) => {
@@ -446,13 +464,12 @@ const Book = () => {
     };
 
     return (
-        <div className="flex flex-col min-h-screen bg-white text-black">
-
+        <div className="flex flex-col min-h-screen bg-gray-50 text-black">
+            {/* Headers remain full width */}
             <BookHeader />
-
             <BookingHeader currentDate={currentDate} selectedDate={selectedDate} setSelectedDate={setSelectedDate} quote={quote} />
 
-            {/* Main Content based on booking step */}
+            {/* Main Content with responsive padding */}
             <AnimatePresence mode="wait">
                 {bookingStep === 'selection' && (
                     <motion.div
@@ -460,10 +477,10 @@ const Book = () => {
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
+                        className="py-8 md:py-12 px-4 sm:px-6 lg:px-8"
                     >
                         <Tabs activeTab={activeTab} setActiveTab={setActiveTab} />
 
-                        {/* Content */}
                         <AnimatePresence mode="wait">
                             <motion.div
                                 key={activeTab}
@@ -471,27 +488,27 @@ const Book = () => {
                                 animate={{ opacity: 1, y: 0 }}
                                 exit={{ opacity: 0, y: -20 }}
                                 transition={{ duration: 0.3 }}
-                                className="container mx-auto px-4 pb-12"
+                                className="mx-auto max-w-7xl"
                             >
                                 {activeTab === 'theaters' && (
                                     <>
-                                        <div className="text-center mb-8">
+                                        <div className="text-center mb-8 md:mb-12 px-4">
                                             <motion.h2
                                                 initial={{ opacity: 0, y: 20 }}
                                                 animate={{ opacity: 1, y: 0 }}
-                                                className="text-2xl md:text-3xl font-bold"
+                                                className="text-3xl md:text-4xl font-bold"
                                             >
-                                                Book Your <span className="text-[#9f1d21]">Exclusive Private Theatre</span>
+                                                Book Your <span className="text-[#9f1d21]">Private Theatre</span>
                                             </motion.h2>
                                             <motion.div
                                                 initial={{ width: 0 }}
-                                                animate={{ width: "100px" }}
+                                                animate={{ width: "120px" }}
                                                 transition={{ delay: 0.5 }}
-                                                className="h-1 bg-[#9f1d21] mx-auto mt-3"
+                                                className="h-1.5 bg-gradient-to-r from-[#9f1d21] to-yellow-500 mx-auto mt-4 rounded-full"
                                             />
                                         </div>
 
-                                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 px-4 sm:px-6">
                                             {theaters.map((theater) => (
                                                 <TheaterCard
                                                     key={theater.id}
@@ -516,7 +533,8 @@ const Book = () => {
                                             setBookingStep('decoration');
                                         }}
                                         timeSlots={timeSlots}
-                                        bookedTimeSlots={bookedTimeSlots.party || []} />
+                                        bookedTimeSlots={bookedTimeSlots.party || []}
+                                    />
                                 )}
                             </motion.div>
                         </AnimatePresence>
@@ -529,14 +547,16 @@ const Book = () => {
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
-                        className="container mx-auto px-4"
+                        className="py-8 md:py-12 px-4 sm:px-6 lg:px-8"
                     >
-                        <DecorationSelector
-                            onSelect={handleDecorationSelect}
-                            onBack={handleBackToSelection}
-                            onNext={handleProceedToCake}
-                            selectedDecorations={selectedDecorations}
-                        />
+                        <div className="mx-auto max-w-4xl">
+                            <DecorationSelector
+                                onSelect={handleDecorationSelect}
+                                onBack={handleBackToSelection}
+                                onNext={handleProceedToCake}
+                                selectedDecorations={selectedDecorations}
+                            />
+                        </div>
                     </motion.div>
                 )}
 
@@ -546,15 +566,19 @@ const Book = () => {
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
-                        className="container mx-auto px-4"
+                        className="py-8 md:py-12 px-4 sm:px-6 lg:px-8"
                     >
-                        <CakeSelector
-                            onSelect={handleCakeSelect}
-                            onBack={handleBackToDecoration}
-                            onNext={handleProceedToAddOns}
-                            selectedCake={selectedCake}
-                            isEggless={isEggless}
-                        />
+                        <div className="mx-auto max-w-4xl">
+                            <CakeSelector
+                                onSelect={handleCakeSelect}
+                                onBack={handleBackToDecoration}
+                                onNext={handleProceedToAddOns}
+                                selectedCake={selectedCake}
+                                isEggless={isEggless}
+                                setCakeName={setCakeName}
+                                cakeName={cakeName}
+                            />
+                        </div>
                     </motion.div>
                 )}
 
@@ -564,49 +588,74 @@ const Book = () => {
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
-                        className="container mx-auto px-4"
+                        className="py-8 md:py-12 px-4 sm:px-6 lg:px-8"
                     >
-                        <AddOnsSelector
-                            onSelect={handleAddOnsSelect}
-                            onBack={handleProceedToCake}
-                            onNext={handleProceedToConfirmation}
-                            selectedDecorations={selectedDecorations}
-                            selectedRose={selectedRose}
-                            selectedPhotography={selectedPhotography}
-                        />
+                        <div className="mx-auto max-w-4xl">
+                            <AddOnsSelector
+                                onSelect={handleAddOnsSelect}
+                                onBack={handleProceedToCake}
+                                onNext={handleProceedToConfirmation}
+                                selectedDecorations={selectedDecorations}
+                                selectedRose={selectedRose}
+                                selectedPhotography={selectedPhotography}
+                            />
+                        </div>
                     </motion.div>
                 )}
 
                 {bookingStep === 'confirmation' && (
-                    <BookingConfirmation
-                        selectedTheater={selectedTheater}
-                        theaters={theaters}
-                        selectedTimeSlot={selectedTimeSlot}
-                        timeSlots={timeSlots}
-                        guestCount={guestCount}
-                        setGuestCount={setGuestCount}
-                        selectedDecorations={selectedDecorations}
-                        setSelectedDecorations={setSelectedDecorations}
-                        selectedCake={selectedCake}
-                        isEggless={isEggless}
-                        selectedRose={selectedRose}
-                        selectedPhotography={selectedPhotography}
-                        finalPrice={finalPrice}
-                        setBookingStep={setBookingStep}
-                        handleProceedToUserDetails={handleProceedToUserDetails}
-                        decorationOptions={decorationOptions}
-                        cakeOptions={cakeOptions}
-                        decorations={decorations}
-                        roses={roses}
-                        photography={photography}
-                    />
+                    <motion.div
+                        key="confirmation"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="py-8 md:py-12 px-4 sm:px-6 lg:px-8"
+                    >
+                        <div className="mx-auto max-w-2xl">
+                            <BookingConfirmation
+                                selectedTheater={selectedTheater}
+                                theaters={theaters}
+                                selectedTimeSlot={selectedTimeSlot}
+                                timeSlots={timeSlots}
+                                guestCount={guestCount}
+                                setGuestCount={setGuestCount}
+                                selectedDecorations={selectedDecorations}
+                                setSelectedDecorations={setSelectedDecorations}
+                                selectedCake={selectedCake}
+                                isEggless={isEggless}
+                                cakeName={cakeName}
+                                setCakeName={setCakeName}
+                                selectedRose={selectedRose}
+                                selectedPhotography={selectedPhotography}
+                                finalPrice={finalPrice}
+                                setBookingStep={setBookingStep}
+                                handleProceedToUserDetails={handleProceedToUserDetails}
+                                decorationOptions={decorationOptions}
+                                cakeOptions={cakeOptions}
+                                decorations={decorations}
+                                roses={roses}
+                                photography={photography}
+                            />
+                        </div>
+                    </motion.div>
                 )}
-                {bookingStep === 'userDetails' && renderUserDetailsForm()}
 
+                {bookingStep === 'userDetails' && (
+                    <motion.div
+                        key="userDetails"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="py-8 md:py-12 px-4 sm:px-6 lg:px-8"
+                    >
+                        <div className="mx-auto max-w-2xl">
+                            {renderUserDetailsForm()}
+                        </div>
+                    </motion.div>
+                )}
             </AnimatePresence>
 
-            <NotesSection notes={notes} />
-            {/* Success Modal */}
+            {/* Success Modal - keep this as is */}
             {bookingSuccess && (
                 <motion.div
                     initial={{ opacity: 0 }}

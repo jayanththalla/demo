@@ -1,11 +1,38 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Bell, Settings, Filter, Search, BarChart, Eye, EyeOff } from 'lucide-react';
-
+import { Bell, Settings, Filter, Search, BarChart, Eye, EyeOff, Calendar as CalendarIcon, Plus } from 'lucide-react';
 import { getAllBookings } from '../../services/bookingService';
 import StatsCards from './StatsCards';
 import BookingsTable from './BookingsTable';
 import BookingDetailsModal from './BookingDetailsModal';
+import OfflineBookingModal from './Offline';
+
+// Theater and Time Slot Mapping
+const theaterMap = {
+    1: 'Eleganto Theater',
+    2: 'Luminous Premium Theater',
+    3: 'Starlight Theater',
+    party: 'Premium Party Hall'
+};
+
+const timeSlotMap = {
+    '10:00 AM - 1:00 PM': 'Morning (10AM-1PM)',
+    '2:00 PM - 5:00 PM': 'Afternoon (2PM-5PM)',
+    '5:00 PM - 8:00 PM': 'Evening (5PM-8PM)',
+    '8:00 PM - 11:00 PM': 'Night (8PM-11PM)',
+    '11:00 PM - 12:30 AM': 'Late Night (11PM-12:30AM)'
+};
+
+// Index to time slot mapping
+const timeSlotIndexMap = {
+    0: '10:00 AM - 1:00 PM',
+    1: '2:00 PM - 5:00 PM',
+    2: '5:00 PM - 8:00 PM',
+    3: '8:00 PM - 11:00 PM',
+    4: '11:00 PM - 12:30 AM'
+};
+
+
 
 const AdminDashboard = () => {
     const [bookings, setBookings] = useState([]);
@@ -15,11 +42,14 @@ const AdminDashboard = () => {
     const [statusFilter, setStatusFilter] = useState('all');
     const [loading, setLoading] = useState(true);
     const [showStats, setShowStats] = useState(true);
-
+    const [selectedDate, setSelectedDate] = useState(new Date('2025-03-31')); // Default to March 31, 2025
+    const [showOfflineBooking, setShowOfflineBooking] = useState(false);
+    // Authentication state
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
     const [showPassword, setShowPassword] = useState(false);
+
     const handleLogin = (e) => {
         e.preventDefault();
         if (password === process.env.REACT_APP_ADMIN_PASSWORD) {
@@ -36,22 +66,45 @@ const AdminDashboard = () => {
             try {
                 const allBookings = await getAllBookings();
                 if (allBookings) {
-                    const bookingsArray = Object.keys(allBookings).map((key) => ({
-                        id: key,
-                        ...allBookings[key],
-                    }));
+                    // In your AdminDashboard component, ensure proper data transformation:
+                    const bookingsArray = Object.keys(allBookings).map((key) => {
+                        const booking = allBookings[key];
+
+                        // Handle both formats of timeSlot (raw "1-2" or formatted "5:00 PM - 8:00 PM")
+                        let timeSlotDisplay = booking.timeSlot;
+                        if (timeSlotMap[booking.timeSlot]) {
+                            timeSlotDisplay = timeSlotMap[booking.timeSlot];
+                        } else if (booking.formattedTimeSlot) {
+                            timeSlotDisplay = booking.formattedTimeSlot;
+                        }
+
+                        // Calculate balance due
+                        const balanceDue = Math.max((booking.totalPrice || 0) - (booking.amountPaid || 0), 0);
+
+                        return {
+                            id: key,
+                            ...booking,
+                            theaterName: booking.theaterName || theaterMap[booking.theaterId] || `Theater ${booking.theaterId}`,
+                            formattedTimeSlot: timeSlotDisplay,
+                            balanceDue: balanceDue
+                        };
+                    });
                     setBookings(bookingsArray);
                     setFilteredBookings(bookingsArray);
                 }
             } catch (error) {
                 console.error('Error fetching bookings:', error);
+                setBookings([]);
+                setFilteredBookings([]);
             } finally {
                 setLoading(false);
             }
         };
 
-        fetchBookings();
-    }, []);
+        if (isAuthenticated) {
+            fetchBookings();
+        }
+    }, [isAuthenticated]);
 
     // Filter bookings
     useEffect(() => {
@@ -70,8 +123,14 @@ const AdminDashboard = () => {
             );
         }
 
+        // Filter by selected date
+        const selectedDateStr = selectedDate.toLocaleDateString('en-US');
+        filtered = filtered.filter(booking =>
+            new Date(booking.date).toLocaleDateString('en-US') === selectedDateStr
+        );
+
         setFilteredBookings(filtered);
-    }, [searchQuery, statusFilter, bookings]);
+    }, [searchQuery, statusFilter, bookings, selectedDate]);
 
     if (!isAuthenticated) {
         return (
@@ -132,6 +191,15 @@ const AdminDashboard = () => {
             >
                 <h1 className="text-4xl font-bold text-gray-800">Admin Dashboard</h1>
                 <div className="flex gap-3">
+                    <motion.button
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        onClick={() => setShowOfflineBooking(true)}
+                        className="px-4 py-2 bg-green-600 text-white rounded-lg flex items-center gap-2"
+                    >
+                        <Plus size={18} />
+                        <span>Offline Booking</span>
+                    </motion.button>
                     <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} className="p-2 bg-white rounded-full shadow-md text-gray-700">
                         <Bell size={20} />
                     </motion.button>
@@ -158,6 +226,34 @@ const AdminDashboard = () => {
                     />
                 )}
             </AnimatePresence>
+
+            {/* Date Selector */}
+            <div className="mb-6 bg-white rounded-xl shadow-lg p-6">
+                <div className="flex justify-between items-center">
+                    <div className="flex items-center gap-4">
+                        <input
+                            type="date"
+                            value={selectedDate.toISOString().split('T')[0]}
+                            onChange={(e) => setSelectedDate(new Date(e.target.value))}
+                            className="px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        />
+                        <h2 className="text-xl font-bold text-gray-800">
+                            Bookings for {selectedDate.toLocaleDateString('en-US', {
+                                weekday: 'long',
+                                month: 'long',
+                                day: 'numeric',
+                                year: 'numeric'
+                            })}
+                        </h2>
+                    </div>
+                    <button
+                        onClick={() => setSelectedDate(new Date())}
+                        className="px-4 py-2 bg-blue-100 text-blue-600 rounded-lg hover:bg-blue-200 transition-colors"
+                    >
+                        Today
+                    </button>
+                </div>
+            </div>
 
             {/* Search and Filter */}
             <motion.div
@@ -207,17 +303,33 @@ const AdminDashboard = () => {
             {/* Bookings Table */}
             {loading ? (
                 <LoadingSpinner />
-            ) : (
+            ) : filteredBookings.length > 0 ? (
                 <BookingsTable
                     bookings={filteredBookings}
                     onRowClick={setSelectedBooking}
                 />
+            ) : (
+                <div className="bg-white rounded-xl shadow-lg p-8 text-center">
+                    <h3 className="text-xl font-medium text-gray-700 mb-2">No bookings found</h3>
+                    <p className="text-gray-500">
+                        There are no bookings for {selectedDate.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
+                        that match your current filters.
+                    </p>
+                </div>
             )}
 
             {/* Booking Details Modal */}
             <BookingDetailsModal
                 booking={selectedBooking}
                 onClose={() => setSelectedBooking(null)}
+            />
+
+            {/* Offline Booking Modal */}
+            <OfflineBookingModal
+                isOpen={showOfflineBooking}
+                onClose={() => setShowOfflineBooking(false)}
+                theaters={theaterMap}
+                timeSlots={timeSlotMap}
             />
         </div>
     );
