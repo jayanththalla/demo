@@ -42,7 +42,7 @@ const AdminDashboard = () => {
     const [statusFilter, setStatusFilter] = useState('all');
     const [loading, setLoading] = useState(true);
     const [showStats, setShowStats] = useState(true);
-    const [selectedDate, setSelectedDate] = useState(new Date('2025-03-31')); // Default to March 31, 2025
+    const [selectedDate, setSelectedDate] = useState(new Date());
     const [showOfflineBooking, setShowOfflineBooking] = useState(false);
     // Authentication state
     const [isAuthenticated, setIsAuthenticated] = useState(false);
