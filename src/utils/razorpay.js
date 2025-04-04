@@ -1,3 +1,5 @@
+import { useBookings } from '../context/BookingContext';
+
 const waitForRazorpay = () => {
     return new Promise((resolve) => {
         const check = () => {
@@ -116,5 +118,40 @@ export const openRazorpayPayment = async (orderDetails, onSuccess, onFailure, on
         paymentModal.open();
     } catch (error) {
         onFailure(error);
+    }
+};
+
+export const handlePaymentSuccess = async (response, bookingDetails) => {
+    const { addBooking } = useBookings();
+    try {
+        // ...existing payment verification code...
+
+        // Add the new booking to context
+        addBooking(bookingDetails);
+
+        // ...rest of success handling code...
+    } catch (error) {
+        console.error('Payment verification failed:', error);
+        throw error;
+    }
+};
+
+// For offline bookings:
+export const sendOfflineBookingConfirmation = async (bookingDetails) => {
+    try {
+        const response = await fetch('http://localhost:5000/api/send-offline-booking-confirmation', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ bookingDetails }),
+        });
+
+        if (!response.ok) throw new Error('Failed to send confirmation emails');
+
+        return await response.json();
+    } catch (error) {
+        console.error('Error:', error);
+        throw error;
     }
 };

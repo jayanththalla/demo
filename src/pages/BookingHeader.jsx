@@ -29,8 +29,8 @@ const BookingHeader = ({ currentDate, selectedDate, setSelectedDate, quote }) =>
     };
 
     return (
-        <div className="container mx-auto px-4 py-4">
-            <div className="flex flex-col md:flex-row justify-between items-center bg-gray-100 rounded-lg p-4 shadow-lg mb-8">
+        <div className="container max-w-4xl mx-auto px-4 py-4">
+            <div className="flex flex-col md:flex-row justify-center items-center bg-gray-50 rounded-lg p-4 ">
                 <div className="flex flex-col md:flex-row items-center gap-4">
                     <div className="flex items-center text-lg">
                         <Calendar className="mr-2 text-[#9f1d21]" />
@@ -50,7 +50,6 @@ const BookingHeader = ({ currentDate, selectedDate, setSelectedDate, quote }) =>
                         />
                     </div>
                 </div>
-                {quote && <p className="text-lg mt-2 md:mt-0 text-[#9f1d21] italic">{quote}</p>}
             </div>
         </div>
     );

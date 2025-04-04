@@ -7,7 +7,7 @@ const BookHeader = () => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 1 }}
-            className="relative w-full bg-white overflow-hidden mt-16"
+            className="relative w-full overflow-hidden mt-16"
             style={{ height: '350px' }}
         >
             {/* Background Image */}

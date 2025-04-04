@@ -248,30 +248,24 @@ const BookingConfirmation = ({
                     <div className="flex items-center justify-between">
                         <div className="flex items-center">
                             <Cake className="h-5 w-5 text-yellow-400 mr-2" />
-                            <p className="font-bold text-yellow-400">Cake</p>
-                        </div>
-                    </div>
-                    <div className="flex justify-between items-center mt-2">
-                        <div className="ml-7">
-                            {selectedCake ? (
-                                <div className="space-y-2">
-                                    <div className="flex items-center text-white">
-                                        <span>{cakeOptions.find(c => c.id === selectedCake)?.name}</span>
+                            <div>
+                                <p className="font-bold text-yellow-400">Cake</p>
+                                {selectedCake && (
+                                    <div className="text-white text-sm space-y-1">
+                                        <p>{cakeOptions.find(c => c.id === selectedCake)?.name}</p>
                                         {isEggless && (
-                                            <span className="ml-2 px-2 py-0.5 bg-green-800 text-green-200 text-xs rounded-full">
+                                            <span className="px-2 py-0.5 bg-green-800 text-green-200 text-xs rounded-full">
                                                 Eggless
                                             </span>
                                         )}
+                                        {cakeName && (
+                                            <p className="text-gray-300 italic">
+                                                Message: "{cakeName}"
+                                            </p>
+                                        )}
                                     </div>
-                                    {cakeName && (
-                                        <p className="text-gray-300 text-sm">
-                                            Message: "{cakeName}"
-                                        </p>
-                                    )}
-                                </div>
-                            ) : (
-                                <span className="text-white">None</span>
-                            )}
+                                )}
+                            </div>
                         </div>
                         {selectedCake && (
                             <p className="text-yellow-400 font-semibold">

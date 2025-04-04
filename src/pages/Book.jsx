@@ -14,6 +14,7 @@ import BookingHeader from './BookingHeader';
 import BookingConfirmation from './BookingConfirmation';
 import { openRazorpayPayment } from '../utils/razorpay';
 import UserDetailsForm from '../components/UserDetailsForm';
+import { sendOfflineBookingConfirmation } from '../services/emailService';
 
 const Book = () => {
     const [activeTab, setActiveTab] = useState('theaters');
@@ -22,7 +23,7 @@ const Book = () => {
     const [selectedTimeSlot, setSelectedTimeSlot] = useState(null);
     const [selectedTheater, setSelectedTheater] = useState(theaters[0]?.id || null);
     const [guestCount, setGuestCount] = useState(2);
-    const [selectedCake, setselectedCake] = useState(null); // For cake
+    const [selectedCake, setSelectedCake] = useState(null); // For cake
     const [isEggless, setIsEggless] = useState(false); // For cake
     const [selectedDecorations, setSelectedDecorations] = useState([]);
     const [cakePrice, setCakePrice] = useState(0);
@@ -173,6 +174,29 @@ const Book = () => {
                     amount,
                     response.razorpay_payment_id
                 );
+
+                // Send confirmation emails
+                try {
+                    await sendOfflineBookingConfirmation({
+                        id: bookingId,
+                        date: selectedDate,
+                        timeSlot: selectedTimeSlot,
+                        theaterName: theaters.find(t => t.id === selectedTheater)?.name,
+                        totalPrice: finalPrice,
+                        amountPaid: amount,
+                        paymentStatus: 'paid',
+                        paymentMethod: 'offline',
+                        userDetails: {
+                            name: name,
+                            email: email,
+                            phone: phone
+                        }
+                    });
+                } catch (emailError) {
+                    console.error('Error sending confirmation emails:', emailError);
+                    // Continue with booking even if email fails
+                }
+
                 await reserveTimeSlot(selectedDate, selectedTimeSlot, selectedTheater, bookingId);
                 setBookingDetails(prev => ({
                     ...prev,
@@ -297,17 +321,47 @@ const Book = () => {
             document.body.removeChild(script);
         };
     }, []);
+    const formatDate = (date) => {
+        if (!date) return null;
 
+        let d;
+        // Handle different date formats
+        if (typeof date === 'string' && date.includes('/')) {
+            // Handle date in format MM/DD/YYYY
+            const [month, day, year] = date.split('/');
+            d = new Date(year, month - 1, day);
+        } else {
+            d = new Date(date);
+        }
+
+        // Format to YYYY-MM-DD
+        const year = d.getFullYear();
+        const month = String(d.getMonth() + 1).padStart(2, '0');
+        const day = String(d.getDate()).padStart(2, '0');
+
+        return `${year}-${month}-${day}`;
+    };
     useEffect(() => {
         const fetchAllBookedTimeSlots = async () => {
             try {
                 const theaterBookings = {};
+
+                // Format the selected date properly
+                const formattedDate = formatDate(selectedDate);
+                console.log('Selected Date:', selectedDate);
+                console.log('Formatted Date:', formattedDate);
+
+                // Fetch bookings for regular theaters
                 for (const theater of theaters) {
-                    const response = await fetchBookedSlots(selectedDate, theater.id);
+                    const response = await fetchBookedSlots(formattedDate, theater.id);
                     theaterBookings[theater.id] = response;
                 }
-                const partyHallResponse = await fetchBookedSlots(selectedDate, 'party');
+
+                // Fetch party hall bookings
+                const partyHallResponse = await fetchBookedSlots(formattedDate, 'party');
                 theaterBookings['party'] = partyHallResponse;
+
+                console.log('All booked slots:', theaterBookings);
                 setBookedTimeSlots(theaterBookings);
             } catch (error) {
                 console.error('Error fetching booked time slots:', error);
@@ -319,7 +373,7 @@ const Book = () => {
             const interval = setInterval(fetchAllBookedTimeSlots, 300000);
             return () => clearInterval(interval);
         }
-    }, [selectedDate]); // Add selectedDate as a dependency
+    }, [selectedDate, theaters]);
     {
         errors.booking && (
             <motion.div
@@ -420,11 +474,11 @@ const Book = () => {
         setSelectedDecorations(decorations.length > 0 ? [decorations[0]] : []); // Allow only one decoration
     };
 
-    const handleCakeSelect = (cakeId, price, eggless, message) => {
-        setselectedCake(cakeId); // Store the cake ID
-        setIsEggless(eggless);
-        setCakePrice(price);
-        setCakeName(message);
+    const handleCakeSelect = (cakeData) => {
+        setSelectedCake(cakeData.id);
+        setCakePrice(cakeData.price);
+        setIsEggless(cakeData.isEggless);
+        setCakeName(cakeData.message);
     };
 
     const handleAddOnsSelect = (selections) => {
@@ -467,8 +521,7 @@ const Book = () => {
         <div className="flex flex-col min-h-screen bg-gray-50 text-black">
             {/* Headers remain full width */}
             <BookHeader />
-            <BookingHeader currentDate={currentDate} selectedDate={selectedDate} setSelectedDate={setSelectedDate} quote={quote} />
-
+            <BookingHeader currentDate={currentDate} selectedDate={selectedDate} setSelectedDate={setSelectedDate} />
             {/* Main Content with responsive padding */}
             <AnimatePresence mode="wait">
                 {bookingStep === 'selection' && (
@@ -477,7 +530,7 @@ const Book = () => {
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
-                        className="py-8 md:py-12 px-4 sm:px-6 lg:px-8"
+                        className="py-4 md:py-2 px-4 sm:px-6 lg:px-8"
                     >
                         <Tabs activeTab={activeTab} setActiveTab={setActiveTab} />
 
@@ -693,7 +746,7 @@ const Book = () => {
                                 setSelectedTheater(null);
                                 setSelectedTimeSlot(null);
                                 setSelectedDecorations([]);
-                                setselectedCake(null);
+                                setSelectedCake(null);
                                 setIsEggless(false);
                                 setSelectedRose(null);
                                 setSelectedPhotography(null);

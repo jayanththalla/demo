@@ -30,12 +30,29 @@ const DetailSection = ({ booking }) => (
 const AddonsSection = ({ booking }) => (
     <div className="space-y-4">
         {booking.decorations?.length > 0 && (
-            <DetailItem icon={<Sparkles className="text-purple-600" />} label="Decoration" value={booking.decorations.join(', ')} />
+            <DetailItem
+                icon={<Sparkles className="text-purple-600" />}
+                label="Decoration"
+                value={booking.decorations.join(', ')}
+            />
         )}
         {booking.cake && (
-            <DetailItem icon={<Cake className="text-pink-600" />} label="Cake"
-                value={`${booking.cake} ${booking.isEggless ? '(Eggless)' : ''}`}
-            />
+            <div className="space-y-2">
+                <DetailItem
+                    icon={<Cake className="text-pink-600" />}
+                    label="Cake"
+                    value={`${booking.cake.id}  ${booking.cake.name}${booking.cake.isEggless ? '(Eggless)' : ''}`}
+                />
+                {booking.cake.message && (
+                    <div className="ml-8 text-sm">
+                        <span className="text-gray-500">Message on cake:</span>
+                        <p className="font-medium mt-1">"{booking.cake.message}"</p>
+                    </div>
+                )}
+                {/* <div className="ml-8 text-sm text-gray-500">
+                    Price: ₹{booking.cake.price}
+                </div> */}
+            </div>
         )}
         {booking.addOns?.rose && (
             <DetailItem icon={<Gift className="text-red-600" />} label="Rose" value={booking.addOns.rose} />

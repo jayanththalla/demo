@@ -1,9 +1,13 @@
-//src/App.jsx 
 import { RouterProvider } from 'react-router-dom';
 import { router } from './routes/index';
+import { BookingProvider } from './context/BookingContext';
 
 function App() {
-  return <RouterProvider router={router} />;
+  return (
+    <BookingProvider>
+      <RouterProvider router={router} />
+    </BookingProvider>
+  );
 }
 
 export default App;

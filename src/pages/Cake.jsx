@@ -3,15 +3,19 @@ import { ArrowLeft, ArrowRight } from 'lucide-react';
 import PropTypes from 'prop-types';
 import { cakeOptions } from './data/constants';
 
-const CakeSelector = ({ onSelect, onBack, onNext, selectedCake, isEggless }) => {
+const CakeSelector = ({ onSelect, onBack, onNext, selectedCake, isEggless, cakeName, setCakeName }) => {
     const [selectedCakeLocal, setSelectedCakeLocal] = useState(selectedCake);
     const [isEgglessLocal, setIsEgglessLocal] = useState(isEggless);
-    const [cakeName, setCakeName] = useState('');
 
-    // Update parent when any value changes
     useEffect(() => {
         const selectedCakeOption = cakeOptions.find(c => c.id === selectedCakeLocal);
-        onSelect(selectedCakeLocal, selectedCakeOption?.price || 0, isEgglessLocal, cakeName);
+        onSelect({
+            id: selectedCakeLocal,
+            name: selectedCakeOption?.name || '',
+            price: selectedCakeOption?.price || 0,
+            isEggless: isEgglessLocal,
+            message: cakeName
+        });
     }, [selectedCakeLocal, isEgglessLocal, cakeName, onSelect]);
 
     // Add validation for cake message
@@ -149,7 +153,8 @@ CakeSelector.propTypes = {
     onNext: PropTypes.func.isRequired,
     selectedCake: PropTypes.string,
     isEggless: PropTypes.bool,
-    cakeName: PropTypes.string // Add this line
+    cakeName: PropTypes.string, // Add this line
+    setCakeName: PropTypes.func.isRequired // Add this line
 };
 
 export default CakeSelector;

@@ -72,26 +72,28 @@ const AdminDashboard = () => {
                     const bookingsArray = Object.keys(allBookings).map((key) => {
                         const booking = allBookings[key];
 
-                        // Handle missing timeSlot with a default value
-                        const timeSlot = booking.timeSlot || '0-0'; // Default to first time slot if missing
+                        // Handle missing or numeric timeSlot
+                        const timeSlot = booking.timeSlot?.toString() || '0'; // Convert to string and provide default
 
-                        // Handle time slot format
+                        // Handle time slot display format
                         let timeSlotDisplay = timeSlot;
-                        if (timeSlot.includes('-')) {
+                        if (typeof timeSlot === 'string' && timeSlot.includes('-')) {
                             const [theaterId, slotIndex] = timeSlot.split('-');
                             timeSlotDisplay = timeSlotIndexMap[slotIndex] || timeSlot;
                         } else if (timeSlotMap[timeSlot]) {
                             timeSlotDisplay = timeSlotMap[timeSlot];
+                        } else {
+                            // Handle numeric time slot
+                            timeSlotDisplay = timeSlotIndexMap[timeSlot] || timeSlot;
                         }
 
-                        // Handle missing userDetails
+                        // Rest of the booking processing...
                         const userDetails = booking.userDetails || {
                             name: 'Unknown Customer',
                             email: '',
                             phone: ''
                         };
 
-                        // Calculate balance due
                         const totalPrice = booking.totalPrice || 0;
                         const amountPaid = booking.amountPaid || 0;
                         const balanceDue = Math.max(totalPrice - amountPaid, 0);
@@ -99,7 +101,7 @@ const AdminDashboard = () => {
                         return {
                             id: key,
                             ...booking,
-                            userDetails, // Ensure userDetails exists
+                            userDetails,
                             theaterName: theaterMap[booking.theaterId] || `Theater ${booking.theaterId}`,
                             formattedTimeSlot: timeSlotDisplay,
                             balanceDue,

@@ -1,9 +1,12 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X } from 'lucide-react';
-import { saveBooking } from '../../services/bookingService';
+import { saveBooking, checkTimeSlotAvailability, fetchBookedSlots } from '../../services/bookingService';
+import { sendOfflineBookingConfirmation } from '../../utils/razorpay';
+import { useBookings } from '../../context/BookingContext';
 
 const OfflineBookingModal = ({ isOpen, onClose, theaters, timeSlots }) => {
+    const { addBooking } = useBookings();
     const [formData, setFormData] = useState({
         customerName: '',
         email: '',
@@ -29,52 +32,70 @@ const OfflineBookingModal = ({ isOpen, onClose, theaters, timeSlots }) => {
         }));
     };
 
-    // Update the form submission handler in OfflineBookingModal
     const handleSubmit = async (e) => {
         e.preventDefault();
         setIsSubmitting(true);
         setError('');
 
         try {
-            // Convert theaterId to number and get theater name
             const theaterId = parseInt(formData.theaterId);
-            const theaterName = theaters[theaterId] || `Theater ${theaterId}`;
 
-            // Format time slot correctly (assuming timeSlots is in format { '1-2': '5:00 PM - 8:00 PM' })
-            const timeSlotKey = Object.keys(timeSlots).find(key => timeSlots[key] === formData.timeSlot) || formData.timeSlot;
+            // Get the numeric time slot index
+            const timeSlotIndex = Object.keys(timeSlots).indexOf(formData.timeSlot);
+            if (timeSlotIndex === -1) {
+                throw new Error('Invalid time slot selected');
+            }
+
+            // Check if slot is already booked
+            const bookedSlots = await fetchBookedSlots(formData.date, theaterId);
+            const timeSlotKey = `${theaterId}-${timeSlotIndex}`;
+
+            if (bookedSlots.includes(timeSlotKey)) {
+                throw new Error('This time slot is already booked. Please select another slot.');
+            }
 
             const bookingDetails = {
+                id: Date.now().toString(),
                 date: formData.date,
-                timeSlot: timeSlotKey, // Store as "1-2" format
+                timeSlot: timeSlotIndex,
                 theaterId: theaterId,
-                theaterName: theaterName, // Include theater name directly
+                theaterName: theaters[theaterId] || `Theater ${theaterId}`,
                 totalPrice: parseFloat(formData.totalPrice),
-                seats: [], // Add actual seats if needed
+                amountPaid: parseFloat(formData.amountPaid),
+                paymentMethod: 'offline',
                 status: 'confirmed',
                 paymentStatus: formData.amountPaid >= formData.totalPrice ? 'paid' : 'partial',
-                amountPaid: parseFloat(formData.amountPaid),
-                paymentMethod: formData.paymentMethod,
                 userDetails: {
                     name: formData.customerName,
                     email: formData.email,
                     phone: formData.phone
-                },
-                createdAt: new Date().toISOString(),
-                updatedAt: new Date().toISOString(),
-                paymentHistory: [{
-                    amount: parseFloat(formData.amountPaid),
-                    method: formData.paymentMethod,
-                    type: formData.amountPaid >= formData.totalPrice ? 'full' : 'partial',
-                    date: new Date().toISOString(),
-                    receivedBy: 'admin',
-                    status: 'success'
-                }]
+                }
             };
 
-            const bookingId = await saveBooking(bookingDetails);
-            onClose();
-            // Reset form or other success actions
+            // Additional validation
+            if (formData.amountPaid > formData.totalPrice) {
+                throw new Error('Amount paid cannot be greater than total price');
+            }
 
+            const bookingId = await saveBooking(bookingDetails);
+            if (!bookingId) throw new Error('Failed to create booking');
+
+            // Add the new booking to context
+            addBooking({ ...bookingDetails, id: bookingId });
+
+            // Send confirmation emails
+            try {
+                await sendOfflineBookingConfirmation({
+                    ...bookingDetails,
+                    id: bookingId
+                });
+                console.log('Confirmation emails sent successfully');
+            } catch (emailError) {
+                console.error('Failed to send confirmation emails:', emailError);
+                // Don't throw error here - booking was successful even if email fails
+            }
+
+            onClose();
         } catch (err) {
             setError(err.message || 'Failed to create booking');
         } finally {
@@ -114,43 +135,43 @@ const OfflineBookingModal = ({ isOpen, onClose, theaters, timeSlots }) => {
                     <form onSubmit={handleSubmit} className="space-y-4">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Customer Name*</label>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Customer Name</label>
                                 <input
                                     type="text"
                                     name="customerName"
                                     value={formData.customerName}
                                     onChange={handleChange}
                                     className="w-full px-4 py-2 border border-gray-300 rounded-lg"
-                                    required
+                                // required
                                 />
                             </div>
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Email*</label>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
                                 <input
                                     type="email"
                                     name="email"
                                     value={formData.email}
                                     onChange={handleChange}
                                     className="w-full px-4 py-2 border border-gray-300 rounded-lg"
-                                    required
+                                // required
                                 />
                             </div>
                         </div>
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Phone Number*</label>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Phone Number</label>
                                 <input
                                     type="tel"
                                     name="phone"
                                     value={formData.phone}
                                     onChange={handleChange}
                                     className="w-full px-4 py-2 border border-gray-300 rounded-lg"
-                                    required
+                                // required
                                 />
                             </div>
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Total Price*</label>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Total Price</label>
                                 <input
                                     type="number"
                                     name="totalPrice"
@@ -158,7 +179,6 @@ const OfflineBookingModal = ({ isOpen, onClose, theaters, timeSlots }) => {
                                     onChange={handleChange}
                                     className="w-full px-4 py-2 border border-gray-300 rounded-lg"
                                     min="0"
-                                    required
                                 />
                             </div>
                         </div>

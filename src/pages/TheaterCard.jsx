@@ -60,8 +60,8 @@ const TheaterCard = ({ ...props }) => {
                         key={index}
                         onClick={() => setCurrentImageIndex(index)}
                         className={`w-2 h-2 rounded-full transition-all ${currentImageIndex === index
-                                ? 'bg-yellow-400 w-4'
-                                : 'bg-white/50 hover:bg-white/75'
+                            ? 'bg-yellow-400 w-4'
+                            : 'bg-white/50 hover:bg-white/75'
                             }`}
                         aria-label={`View image ${index + 1}`}
                     />
@@ -138,28 +138,26 @@ const TheaterCard = ({ ...props }) => {
                     </p>
                     <div className="grid grid-cols-2 gap-1 mb-3">
                         {timeSlots.map((slot, index) => {
-                            const slotId = `${theater.id}-${index}`; // Ensure this matches the format in bookedTimeSlots
-                            const isBooked = theaterBookedSlots.includes(slotId); // Check if the slot is booked
+                            const timeSlotKey = `${theater.id}-${index}`;
+                            // Check both array and object formats for booked slots
+                            const isBooked = bookedTimeSlots[theater.id]?.some(bookedSlot =>
+                                bookedSlot === index.toString() || bookedSlot === timeSlotKey
+                            );
 
                             return (
                                 <motion.div
                                     key={index}
                                     whileHover={{ scale: isBooked ? 1 : 1.05 }}
                                     whileTap={{ scale: isBooked ? 1 : 0.95 }}
-                                    initial={{ opacity: 0, y: 10 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    transition={{ delay: index * 0.1 }}
-                                    onClick={() => !isBooked && setSelectedTimeSlot(slotId)}
-                                    className={`text-xs p-2 border border-yellow-400 rounded text-center cursor-pointer transition-all ${selectedTimeSlot === slotId
-                                        ? 'bg-yellow-400 text-black font-bold'
-                                        : isBooked
-                                            ? 'bg-gray-200 text-gray-400 cursor-not-allowed opacity-50'
-                                            : 'hover:bg-yellow-400/20'
+                                    onClick={() => !isBooked && setSelectedTimeSlot(timeSlotKey)}
+                                    className={`text-xs p-2 border rounded text-center cursor-pointer transition-all 
+                                        ${selectedTimeSlot === timeSlotKey
+                                            ? 'bg-yellow-400 text-black font-bold border-yellow-400'
+                                            : isBooked
+                                                ? 'bg-gray-200 text-gray-400 cursor-not-allowed border-gray-300'
+                                                : 'hover:bg-yellow-400/20 border-yellow-400'
                                         }`}
                                     style={{ pointerEvents: isBooked ? 'none' : 'auto' }}
-                                    role="button"
-                                    aria-label={`Select time slot ${slot}`}
-                                    aria-disabled={isBooked}
                                 >
                                     {slot}
                                 </motion.div>
@@ -170,7 +168,7 @@ const TheaterCard = ({ ...props }) => {
                         whileHover={{ scale: 1.03 }}
                         whileTap={{ scale: 0.97 }}
                         onClick={() => handleBookNow(theater.id)}
-                        className="w-full bg-[#9f1d21] text-white py-2 font-bold rounded-lg hover:bg-[#b82329] transition-colors flex items-center justify-center mb-2"
+                        className="w-full bg-[#9f1d21] text-white py-2 font-bold rounded hover:bg-[#b82329] transition-colors flex items-center justify-center"
                     >
                         <Calendar className="mr-2" size={18} />
                         Book now
