@@ -155,3 +155,23 @@ export const sendOfflineBookingConfirmation = async (bookingDetails) => {
         throw error;
     }
 };
+
+// For online bookings:
+export const sendOnlineBookingConfirmation = async (bookingDetails) => {
+    try {
+        const response = await fetch('http://localhost:5000/api/send-online-booking-confirmation', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ bookingDetails }),
+        });
+
+        if (!response.ok) throw new Error('Failed to send confirmation emails');
+
+        return await response.json();
+    } catch (error) {
+        console.error('Error:', error);
+        throw error;
+    }
+};
