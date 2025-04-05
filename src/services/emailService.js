@@ -1,6 +1,6 @@
 export const sendOfflineBookingConfirmation = async (bookingDetails) => {
     try {
-        const response = await fetch('http://localhost:5000/api/send-offline-booking-confirmation', {
+        const response = await fetch('https://bingehallbackend.onrender.com/api/send-offline-booking-confirmation', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -22,7 +22,7 @@ export const sendOfflineBookingConfirmation = async (bookingDetails) => {
 
 export const sendOnlineBookingConfirmation = async (bookingDetails) => {
     try {
-        const response = await fetch('http://localhost:5000/api/send-online-booking-confirmation', {
+        const response = await fetch('https://bingehallbackend.onrender.com/api/send-online-booking-confirmation', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
