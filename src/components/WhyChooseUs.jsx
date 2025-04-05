@@ -1,7 +1,9 @@
 import { motion } from 'framer-motion';
 import { Film, Volume2, Calendar, Users } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 const WhyChooseUs = () => {
+    const navigate = useNavigate();
     const categories = [
         { id: 1, name: "Food & Beverage", image: "/assets/BingeHall/2.png" },
         { id: 2, name: "Netflix", image: "/assets/BingeHall/3.png" },
@@ -98,8 +100,8 @@ const WhyChooseUs = () => {
                     transition={{ duration: 0.8, delay: 0.6 }}
                     className="flex flex-col sm:flex-row items-center justify-center gap-6 mt-16"
                 >
-                    <a
-                        href="/about"
+                    <button
+                        onClick={() => navigate('/about')}
                         className="group px-8 py-4 border-2 border-[#9f1d21] text-[#9f1d21] rounded-lg hover:bg-[#9f1d21] hover:text-white transition-all duration-300 font-medium text-lg min-w-40 text-center relative overflow-hidden"
                     >
                         <span className="relative z-10 flex items-center justify-center gap-2">
@@ -108,9 +110,9 @@ const WhyChooseUs = () => {
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
                             </svg>
                         </span>
-                    </a>
-                    <a
-                        href="/book"
+                    </button>
+                    <button
+                        onClick={() => navigate('/book')}
                         className="group px-8 py-4 bg-[#9f1d21] text-white rounded-lg hover:bg-red-800 transition-all duration-300 font-medium text-lg min-w-40 text-center shadow-lg shadow-red-500/20"
                     >
                         <span className="flex items-center justify-center gap-2">
@@ -119,7 +121,7 @@ const WhyChooseUs = () => {
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
                             </svg>
                         </span>
-                    </a>
+                    </button>
                 </motion.div>
 
             </div>
