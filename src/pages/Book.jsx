@@ -14,7 +14,7 @@ import BookingHeader from './BookingHeader';
 import BookingConfirmation from './BookingConfirmation';
 import { openRazorpayPayment } from '../utils/razorpay';
 import UserDetailsForm from '../components/UserDetailsForm';
-import { sendOfflineBookingConfirmation } from '../services/emailService';
+import { sendOfflineBookingConfirmation, sendOnlineBookingConfirmation } from '../services/emailService';
 
 const Book = () => {
     const [activeTab, setActiveTab] = useState('theaters');
@@ -175,6 +175,57 @@ const Book = () => {
                     response.razorpay_payment_id
                 );
 
+                //send emails for online and offline bookings
+                try {
+                    await sendOnlineBookingConfirmation({
+                        id: bookingId,
+                        date: selectedDate,
+                        timeSlot: selectedTimeSlot,
+                        theaterName: theaters.find(t => t.id === selectedTheater)?.name,
+                        totalPrice: finalPrice,
+                        amountPaid: amount,
+                        paymentStatus: 'paid',
+                        paymentMethod: 'online',
+                        userDetails: {
+                            name: name,
+                            email: email,
+                            phone: phone
+                        },
+                        transactionId: response.razorpay_payment_id,
+                        selectedDecorations,
+                        selectedCake,
+                        cakeName,
+                        selectedRose,
+                        selectedPhotography,
+                        guestCount,
+                        summary: {
+                            theater: theaters.find(t => t.id === selectedTheater)?.name,
+                            timeSlot: timeSlots.find(t => t.id === selectedTimeSlot)?.time,
+                            decorations: selectedDecorations.map(id =>
+                                decorationOptions.find(d => d.id === id)?.name
+                            ).filter(Boolean),
+                            cake: cakeOptions.find(c => c.id === selectedCake)?.name,
+                            cakeDetails: {
+                                message: cakeName
+                            },
+                            addOns: {
+                                rose: roses.find(r => r.id === selectedRose)?.name,
+                                photography: photography.find(p => p.id === selectedPhotography)?.name
+                            },
+                            guestCount,
+                            priceBreakdown: {
+                                basePrice: theaters.find(t => t.id === selectedTheater)?.basePrice || 0,
+                                decorationsCost: decorationOptions.find(d => d.id === selectedDecorations[0])?.price || 0,
+                                cakeCost: cakeOptions.find(c => c.id === selectedCake)?.price || 0,
+                                addOnsCost: (selectedRose ? roses.find(r => r.id === selectedRose)?.price : 0) +
+                                    (selectedPhotography ? photography.find(p => p.id === selectedPhotography)?.price : 0)
+                            }
+                        }
+
+                    });
+                } catch (emailError) {
+                    console.error('Error sending confirmation emails:', emailError);
+                }
                 // Send confirmation emails
                 try {
                     await sendOfflineBookingConfirmation({
@@ -194,7 +245,6 @@ const Book = () => {
                     });
                 } catch (emailError) {
                     console.error('Error sending confirmation emails:', emailError);
-                    // Continue with booking even if email fails
                 }
 
                 await reserveTimeSlot(selectedDate, selectedTimeSlot, selectedTheater, bookingId);

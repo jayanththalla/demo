@@ -111,7 +111,7 @@ app.post('/api/verify-payment', async (req, res) => {
             try {
                 // Send customer email
                 await transporter.sendMail({
-                    from: '"BingeHall" <thallajayanth12@gmail.com>',
+                    from: '"BingeHall" <bingehallinfo@gmail.com>',
                     to: bookingDetails.userDetails.email,
                     subject: '🎉 Your Booking Confirmation - BingeHall',
                     html: generateBookingEmailHTML(bookingDetails)
@@ -119,7 +119,7 @@ app.post('/api/verify-payment', async (req, res) => {
 
                 // Send admin email
                 await transporter.sendMail({
-                    from: '"BingeHall System" <thallajayanth12@gmail.com>',
+                    from: '"BingeHall System" <bingehallinfo@gmail.com>',
                     to: 'bingehall08@gmail.com',
                     subject: '📌 New Booking Notification',
                     html: generateBookingEmailHTML(bookingDetails, true)
@@ -156,14 +156,14 @@ app.post('/api/send-offline-booking-confirmation', async (req, res) => {
         await Promise.all([
             // Send customer email
             transporter.sendMail({
-                from: '"BingeHall" <thallajayanth12@gmail.com>',
+                from: '"BingeHall" <bingehallinfo@gmail.com>',
                 to: bookingDetails.userDetails.email,
                 subject: '🎉 Your Booking Confirmation - BingeHall',
                 html: generateBookingEmailHTML(bookingDetails)
             }),
             // Send admin email
             transporter.sendMail({
-                from: '"BingeHall System" <thallajayanth12@gmail.com>',
+                from: '"BingeHall System" <bingehallinfo@gmail.com>',
                 to: 'bingehall08@gmail.com',
                 subject: '📌 New Offline Booking Notification',
                 html: generateBookingEmailHTML(bookingDetails, true)
@@ -177,4 +177,33 @@ app.post('/api/send-offline-booking-confirmation', async (req, res) => {
     }
 });
 
+
+// Add endpoint for online booking emails
+app.post('/api/send-online-booking-confirmation', async (req, res) => {
+    try {
+        const { bookingDetails } = req.body;
+
+        await Promise.all([
+            // Send customer email
+            transporter.sendMail({
+                from: '"BingeHall" <bingehallinfo@gmail.com>',
+                to: bookingDetails.userDetails.email,
+                subject: '🎉 Your Online Booking Confirmation - BingeHall',
+                html: generateBookingEmailHTML(bookingDetails)
+            }),
+            // Send admin email
+            transporter.sendMail({
+                from: '"BingeHall System" <bingehallinfo@gmail.com>',
+                to: 'bingehall08@gmail.com',
+                subject: '📌 New Online Booking Notification',
+                html: generateBookingEmailHTML(bookingDetails, true)
+            })
+        ]);
+
+        res.status(200).json({ success: true, message: 'Confirmation emails sent' });
+    } catch (error) {
+        console.error('Error sending online booking emails:', error);
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
 export default app;
