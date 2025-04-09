@@ -189,11 +189,32 @@ export const updateBookingStatus = async (bookingId, newStatus) => {
     }
 };
 
-
 export const deleteBooking = async (bookingId) => {
     try {
+        console.log('Attempting to delete booking:', bookingId);
         const bookingRef = ref(db, `bookings/${bookingId}`);
+        const snapshot = await get(bookingRef);
+
+        if (!snapshot.exists()) {
+            console.error(`Booking ${bookingId} not found`);
+            throw new Error('Booking not found');
+        }
+
+        const booking = snapshot.val();
+        console.log('Found booking data:', booking);
+
+        // Delete the booking
         await remove(bookingRef);
+        console.log('Booking deleted successfully');
+
+        // Release the time slot if available
+        if (booking.date && booking.timeSlot !== undefined && booking.theaterId) {
+            const timeSlotKey = `${booking.theaterId}-${booking.timeSlot}`;
+            await remove(ref(db, `timeSlots/${booking.date}/${timeSlotKey}/${booking.theaterId}`));
+            console.log('Time slot released successfully');
+        }
+
+        return true;
     } catch (error) {
         console.error('Error deleting booking:', error);
         throw error;

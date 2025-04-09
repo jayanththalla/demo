@@ -55,21 +55,30 @@ const OfflineBookingModal = ({ isOpen, onClose, theaters, timeSlots }) => {
             }
 
             const bookingDetails = {
-                id: Date.now().toString(),
                 date: formData.date,
                 timeSlot: timeSlotIndex,
                 theaterId: theaterId,
                 theaterName: theaters[theaterId] || `Theater ${theaterId}`,
                 totalPrice: parseFloat(formData.totalPrice),
                 amountPaid: parseFloat(formData.amountPaid),
-                paymentMethod: 'offline',
+                paymentMethod: formData.paymentMethod,
                 status: 'confirmed',
                 paymentStatus: formData.amountPaid >= formData.totalPrice ? 'paid' : 'partial',
                 userDetails: {
                     name: formData.customerName,
                     email: formData.email,
                     phone: formData.phone
-                }
+                },
+                createdAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString(),
+                paymentHistory: [{
+                    amount: parseFloat(formData.amountPaid),
+                    type: formData.amountPaid >= formData.totalPrice ? 'full' : 'partial',
+                    method: formData.paymentMethod,
+                    date: new Date().toISOString(),
+                    status: 'success',
+                    receivedBy: 'admin'
+                }]
             };
 
             // Additional validation
@@ -77,13 +86,17 @@ const OfflineBookingModal = ({ isOpen, onClose, theaters, timeSlots }) => {
                 throw new Error('Amount paid cannot be greater than total price');
             }
 
+            // Save booking and get Firebase-generated ID
             const bookingId = await saveBooking(bookingDetails);
             if (!bookingId) throw new Error('Failed to create booking');
 
-            // Add the new booking to context
-            addBooking({ ...bookingDetails, id: bookingId });
+            // Add booking to context with Firebase ID
+            addBooking({
+                ...bookingDetails,
+                id: bookingId
+            });
 
-            // Send confirmation emails
+            // Send confirmation emails with Firebase ID
             try {
                 await sendOfflineBookingConfirmation({
                     ...bookingDetails,
@@ -92,7 +105,6 @@ const OfflineBookingModal = ({ isOpen, onClose, theaters, timeSlots }) => {
                 console.log('Confirmation emails sent successfully');
             } catch (emailError) {
                 console.error('Failed to send confirmation emails:', emailError);
-                // Don't throw error here - booking was successful even if email fails
             }
 
             onClose();

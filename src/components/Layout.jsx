@@ -12,9 +12,9 @@ const Layout = () => {
     }, [location.pathname]);
 
     return (
-        <div className="min-h-screen bg-black">
+        <div className="min-h-screen bg-gray-50">
             <Header />
-            <main className="pt-20">
+            <main className="pt-28"> {/* Increased padding to accommodate header + promo */}
                 <Outlet />
             </main>
             <Footer />

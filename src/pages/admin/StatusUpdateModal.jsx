@@ -9,15 +9,22 @@ const StatusUpdateModal = ({ isOpen, onClose, bookingId, onStatusUpdate }) => {
         setIsUpdating(true);
         try {
             if (newStatus === 'cancelled') {
-                await deleteBooking(bookingId);
+                const success = await deleteBooking(bookingId);
+                if (success) {
+                    alert('Booking successfully cancelled and deleted');
+                } else {
+                    alert('Failed to delete booking');
+                }
             } else {
                 await updateBookingStatus(bookingId, newStatus);
             }
-            onStatusUpdate();
+            onStatusUpdate(); // This should refresh the bookings list
         } catch (error) {
             console.error('Error updating status:', error);
+            alert('Error: ' + error.message); // Show actual error message
         } finally {
             setIsUpdating(false);
+            onClose();
         }
     };
 

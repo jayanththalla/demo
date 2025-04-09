@@ -1,5 +1,7 @@
 import { Calendar, Building, Clock, Sparkles, Cake, Plus, ChevronLeft, Check, UserPlus, Minus, Tag, Gift } from 'lucide-react';
 import { useState, useEffect } from 'react';
+import ScrollingPromo from '../components/ScrollingPromo';
+import { motion, AnimatePresence } from 'framer-motion';
 
 const BookingConfirmation = ({
     selectedTheater,
@@ -11,7 +13,7 @@ const BookingConfirmation = ({
     selectedDecorations,
     selectedCake,
     isEggless,
-    cakeName, // Add this prop
+    cakeName,
     selectedRose,
     selectedPhotography,
     finalPrice,
@@ -21,7 +23,6 @@ const BookingConfirmation = ({
     cakeOptions,
     roses,
     photography,
-
 }) => {
     const [selectedPayment, setSelectedPayment] = useState('full');
     const [advanceAmount, setAdvanceAmount] = useState(Math.max(500, Math.floor(finalPrice * 0.3)));
@@ -36,14 +37,15 @@ const BookingConfirmation = ({
     const [showReferralInput, setShowReferralInput] = useState(false);
     const [appliedCoupon, setAppliedCoupon] = useState('');
     const [appliedReferral, setAppliedReferral] = useState('');
-    // Calculate the payable amount
+    const [availableCoupons, setAvailableCoupons] = useState([]);
+    const [notification, setNotification] = useState({ show: false, type: '', message: '' });
+
     const subtotal = finalPrice;
     const totalAfterDiscount = subtotal - discount;
     const payableAmount = selectedPayment === 'full'
         ? totalAfterDiscount + convenienceFee
         : Math.min(advanceAmount, totalAfterDiscount) + convenienceFee;
 
-    // Ensure advance amount is within valid range
     useEffect(() => {
         const minAdvance = 500;
         const maxAdvance = totalAfterDiscount - 1;
@@ -55,32 +57,101 @@ const BookingConfirmation = ({
         }
     }, [advanceAmount, totalAfterDiscount]);
 
-    // Update total discount when either coupon or referral discount changes
     useEffect(() => {
         setDiscount(couponDiscount + referralDiscount);
     }, [couponDiscount, referralDiscount]);
 
-    const handleApplyCoupon = () => {
-        // Prevent applying a coupon if one is already applied
+    const extractCouponCodes = (promos) => {
+        const couponPattern = /"([A-Z0-9]+)"/g;
+        const coupons = [];
+
+        promos.forEach(promo => {
+            let match;
+            while ((match = couponPattern.exec(promo.text)) !== null) {
+                coupons.push({
+                    code: match[1],
+                    discount: parseInt(match[1].replace(/[^0-9]/g, '')) || 0,
+                    isSpecial: true
+                });
+            }
+        });
+
+        return coupons;
+    };
+
+    const handleActivePromosChange = (activePromos) => {
+        const extractedCoupons = extractCouponCodes(activePromos);
+        setAvailableCoupons(extractedCoupons);
+
         if (appliedCoupon) {
-            alert('You already have an applied coupon. Please remove it first.');
+            const currentCoupon = extractedCoupons.find(c => c.code === appliedCoupon);
+            if (!currentCoupon) {
+                handleRemoveCoupon();
+            }
+        }
+    };
+
+    const handleApplyCoupon = (codeToApply = couponCode) => {
+        if (appliedCoupon) {
+            setNotification({
+                show: true,
+                type: 'error',
+                message: 'You already have an applied coupon. Please remove it first.'
+            });
+            setTimeout(() => setNotification({ show: false, type: '', message: '' }), 3000);
             return;
         }
 
-        // In a real app, you would validate the coupon with your backend
-        if (couponCode === 'WELCOME100') {
+        // First check for special promo coupons
+        const validCoupon = availableCoupons.find(c => c.code === codeToApply);
+        if (validCoupon) {
+            setCouponDiscount(validCoupon.discount);
+            setAppliedCoupon(validCoupon.code);
+            setShowCouponInput(false);
+            setNotification({
+                show: true,
+                type: 'success',
+                message: `Coupon ${validCoupon.code} applied successfully! (₹${validCoupon.discount} OFF)`
+            });
+            setTimeout(() => setNotification({ show: false, type: '', message: '' }), 3000);
+            return;
+        }
+
+        // Then check for standard coupons
+        if (codeToApply === 'WELCOME100') {
             setCouponDiscount(100);
             setAppliedCoupon('WELCOME100');
             setShowCouponInput(false);
-        } else if (couponCode === 'MOVIE50') {
+            setNotification({
+                show: true,
+                type: 'success',
+                message: 'Welcome coupon applied successfully! (₹100 OFF)'
+            });
+            setTimeout(() => setNotification({ show: false, type: '', message: '' }), 3000);
+            return;
+        }
+
+        if (codeToApply === 'MOVIE50') {
             setCouponDiscount(50);
             setAppliedCoupon('MOVIE50');
             setShowCouponInput(false);
-        } else {
-            setCouponDiscount(0);
-            setAppliedCoupon('');
-            alert('Invalid coupon code');
+            setNotification({
+                show: true,
+                type: 'success',
+                message: 'Movie coupon applied successfully! (₹50 OFF)'
+            });
+            setTimeout(() => setNotification({ show: false, type: '', message: '' }), 3000);
+            return;
         }
+
+        setCouponDiscount(0);
+        setAppliedCoupon('');
+        setNotification({
+            show: true,
+            type: 'error',
+            message: 'Invalid coupon code'
+        });
+        setTimeout(() => setNotification({ show: false, type: '', message: '' }), 3000);
     };
 
     const handleRemoveCoupon = () => {
@@ -90,13 +161,11 @@ const BookingConfirmation = ({
     };
 
     const handleApplyReferral = () => {
-        // Prevent applying a referral if one is already applied
         if (appliedReferral) {
             alert('You already have an applied referral code. Please remove it first.');
             return;
         }
 
-        // In a real app, you would validate the referral code with your backend
         if (referralCode === 'FRIEND100') {
             setReferralDiscount(100);
             setAppliedReferral('FRIEND100');
@@ -122,6 +191,28 @@ const BookingConfirmation = ({
 
     return (
         <div className="max-w-2xl mx-auto bg-gray-100 rounded-xl p-6 shadow-xl">
+            {/* Notification Toast */}
+            <AnimatePresence>
+                {notification.show && (
+                    <motion.div
+                        initial={{ opacity: 0, y: -50 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -50 }}
+                        className={`fixed top-4 right-4 z-50 p-4 rounded-lg shadow-lg ${notification.type === 'success'
+                            ? 'bg-green-500 text-white'
+                            : 'bg-red-500 text-white'
+                            }`}
+                    >
+                        <p className="font-medium">{notification.message}</p>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
+            {/* Keep ScrollingPromo for functionality but hide it visually */}
+            <div className="hidden">
+                <ScrollingPromo isAdmin={false} onActivePromosChange={handleActivePromosChange} />
+            </div>
+
             <div className="flex items-center justify-between mb-6">
                 <h2 className="text-2xl font-bold text-[#9f1d21]">Confirm Your Booking</h2>
                 <div className="h-10 w-10 bg-[#9f1d21] rounded-full flex items-center justify-center">
@@ -210,7 +301,6 @@ const BookingConfirmation = ({
                     </p>
                 </div>
 
-                {/* Decoration */}
                 {/* Decoration Section */}
                 <div className="bg-gray-800 rounded-lg p-4">
                     <div className="flex items-center justify-between">
@@ -239,9 +329,7 @@ const BookingConfirmation = ({
                             </p>
                         )}
                     </div>
-
                 </div>
-
 
                 {/* Cake Section */}
                 <div className="bg-gray-800 rounded-lg p-4">
@@ -345,20 +433,38 @@ const BookingConfirmation = ({
             {/* Coupon and Referral Section */}
             <div className="mt-4 space-y-3">
                 {!showCouponInput ? (
-                    <button
-                        onClick={() => appliedCoupon ? handleRemoveCoupon() : setShowCouponInput(true)}
-                        className="w-full flex items-center justify-between bg-gray-100 hover:bg-gray-200 p-3 rounded-lg transition-colors"
-                    >
-                        <div className="flex items-center">
-                            <Tag className="h-5 w-5 text-[#9f1d21] mr-2" />
-                            <span className="text-gray-700">
-                                {appliedCoupon ? `Coupon Applied: ${appliedCoupon} (₹${couponDiscount} OFF)` : 'Have a coupon code?'}
+                    <div>
+                        <button
+                            onClick={() => appliedCoupon ? handleRemoveCoupon() : setShowCouponInput(true)}
+                            className="w-full flex items-center justify-between bg-gray-100 hover:bg-gray-200 p-3 rounded-lg transition-colors"
+                        >
+                            <div className="flex items-center">
+                                <Tag className="h-5 w-5 text-[#9f1d21] mr-2" />
+                                <span className="text-gray-700">
+                                    {appliedCoupon ? `Coupon Applied: ${appliedCoupon} (₹${couponDiscount} OFF)` : 'Have a coupon code?'}
+                                </span>
+                            </div>
+                            <span className="text-[#9f1d21] font-medium">
+                                {appliedCoupon ? 'Remove' : 'Apply'}
                             </span>
-                        </div>
-                        <span className="text-[#9f1d21] font-medium">
-                            {appliedCoupon ? 'Remove' : 'Apply'}
-                        </span>
-                    </button>
+                        </button>
+
+                        {availableCoupons.length > 0 && !appliedCoupon && (
+                            <div className="mt-2 text-sm text-gray-600">
+                                <p>Today's special codes:</p>
+                                <div className="flex flex-wrap gap-2 mt-1">
+                                    {availableCoupons.map((coupon, index) => (
+                                        <span
+                                            key={index}
+                                            className="px-2 py-1 bg-yellow-100 text-yellow-800 rounded-full text-xs"
+                                        >
+                                            {coupon.code} (₹{coupon.discount} OFF)
+                                        </span>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+                    </div>
                 ) : (
                     <div className="bg-gray-100 p-3 rounded-lg">
                         <div className="flex items-center mb-2">
@@ -369,7 +475,7 @@ const BookingConfirmation = ({
                             <input
                                 type="text"
                                 value={couponCode}
-                                onChange={(e) => setCouponCode(e.target.value)}
+                                onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
                                 placeholder="Enter coupon code"
                                 className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#9f1d21]"
                             />
@@ -380,45 +486,23 @@ const BookingConfirmation = ({
                                 Apply
                             </button>
                         </div>
-                    </div>
-                )}
 
-                {!showReferralInput ? (
-                    <button
-                        onClick={() => appliedReferral ? handleRemoveReferral() : setShowReferralInput(true)}
-                        className="w-full flex items-center justify-between bg-gray-100 hover:bg-gray-200 p-3 rounded-lg transition-colors"
-                    >
-                        <div className="flex items-center">
-                            <Gift className="h-5 w-5 text-[#9f1d21] mr-2" />
-                            <span className="text-gray-700">
-                                {appliedReferral ? `Referral Applied: ${appliedReferral} (₹${referralDiscount} OFF)` : 'Have a referral code?'}
-                            </span>
-                        </div>
-                        <span className="text-[#9f1d21] font-medium">
-                            {appliedReferral ? 'Remove' : 'Apply'}
-                        </span>
-                    </button>
-                ) : (
-                    <div className="bg-gray-100 p-3 rounded-lg">
-                        <div className="flex items-center mb-2">
-                            <Gift className="h-5 w-5 text-[#9f1d21] mr-2" />
-                            <span className="text-gray-700">Referral Code</span>
-                        </div>
-                        <div className="flex gap-2">
-                            <input
-                                type="text"
-                                value={referralCode}
-                                onChange={(e) => setReferralCode(e.target.value)}
-                                placeholder="Enter referral code"
-                                className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-[#9f1d21]"
-                            />
-                            <button
-                                onClick={handleApplyReferral}
-                                className="px-4 py-2 bg-[#9f1d21] text-white rounded-md hover:bg-[#8a191d] transition-colors"
-                            >
-                                Apply
-                            </button>
-                        </div>
+                        {availableCoupons.length > 0 && (
+                            <div className="mt-2 text-sm text-gray-600">
+                                <p>Try these special codes:</p>
+                                <div className="flex flex-wrap gap-2 mt-1">
+                                    {availableCoupons.map((coupon, index) => (
+                                        <button
+                                            key={index}
+                                            onClick={() => handleApplyCoupon(coupon.code)}
+                                            className="px-2 py-1 bg-yellow-100 text-yellow-800 rounded-full text-xs hover:bg-yellow-200"
+                                        >
+                                            {coupon.code} (₹{coupon.discount} OFF)
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
                     </div>
                 )}
             </div>
